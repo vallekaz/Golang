@@ -43,6 +43,7 @@ type EnvJSON struct {
 	Sersafe     string `json:"sersafe"`
 	Logactivate string `json:"logactivate"`
 	TokenLife   string `json:"tokenlife"`
+	PathLog     string `json:"pathlog"`
 }
 
 //TestJSON para ver el estado de la api
