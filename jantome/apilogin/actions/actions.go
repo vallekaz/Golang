@@ -231,6 +231,7 @@ func getEnv(response http.ResponseWriter, request *http.Request) {
 		envJSON.Sersafe, _ = os.LookupEnv("SERV_SAFE")
 		envJSON.Logactivate, _ = os.LookupEnv("LOG_ACTIVATE")
 		envJSON.TokenLife, _ = os.LookupEnv("TOKEN_LIFE")
+		envJSON.PathLog, _ = os.LookupEnv("PATH_LOG")
 
 		JsResponser, err := json.Marshal(envJSON)
 
@@ -307,7 +308,7 @@ func getRefresh(response http.ResponseWriter, request *http.Request) {
 		//Limpiamos las variables de entorno, para volver a cargarlas de nuevo
 		os.Clearenv()
 		//vuelve a ejecutar environment para cargar las variables de entorno
-		environment.Loadenvironment()
+		environment.Loadenvironment("")
 		//respondemos que se realizo correctamente
 		response.WriteHeader(http.StatusAccepted)
 		return
