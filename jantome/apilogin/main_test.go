@@ -72,7 +72,7 @@ func TestGrabaLog(t *testing.T) {
 //Test para operaciones db2
 func TestEjecutaQuery(t *testing.T) {
 	//cargamos variables
-	environment.Loadenvironment()
+	environment.Loadenvironment("")
 	type args struct {
 		query string
 	}
@@ -115,7 +115,7 @@ func TestLoadenvironment(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			environment.Loadenvironment()
+			environment.Loadenvironment("")
 		})
 	}
 }
@@ -123,7 +123,7 @@ func TestLoadenvironment(t *testing.T) {
 //Test para generar token
 func TestGenerateJWT(t *testing.T) {
 	//cargamos variables de entorno ya que necesitamos el tiempo de vida del token
-	environment.Loadenvironment()
+	environment.Loadenvironment("")
 	type args struct {
 		userLogon string
 		rol       string
