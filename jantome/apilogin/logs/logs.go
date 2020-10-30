@@ -17,6 +17,7 @@ var (
 func GrabaLog(err2 error, descripcion string, tipo string) {
 	//Solo grabamos si el log esta activado
 	logActivate, _ := os.LookupEnv("LOG_ACTIVATE")
+	pathLog, _ := os.LookupEnv("PATH_LOG")
 	switch logActivate {
 	// Si no esta activado no se graba
 	case "N":
@@ -24,7 +25,8 @@ func GrabaLog(err2 error, descripcion string, tipo string) {
 	// en cualquier otro caso grabamos
 	default:
 		//apertura del fichero de log's en caso de no existir lo crea
-		file, err := os.OpenFile("./logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+		//file, err := os.OpenFile("./logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+		file, err := os.OpenFile(pathLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 		if err != nil {
 			log.Fatal(err)
 		}
