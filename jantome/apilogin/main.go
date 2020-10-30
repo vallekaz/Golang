@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,9 +16,13 @@ import (
 
 //main función principal
 func main() {
+	//recuperamos el entorno de ejecuion para saber las rutas
+	entorno := flag.String("entorno", "", "entorno de ejecución")
+	flag.Parse()
+	//fmt.Println("entorno", *entorno)
 	fmt.Println("Arrancando servidor...")
 	//Cargarmos variables de entorno
-	environment.Loadenvironment()
+	environment.Loadenvironment(*entorno)
 	port, _ := os.LookupEnv("SERV_PORT")
 	portSSL, _ := os.LookupEnv("SERV_PORT_SSL")
 	serSafe, _ := os.LookupEnv("SERV_SAFE")
