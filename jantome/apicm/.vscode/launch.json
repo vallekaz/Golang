@@ -11,8 +11,8 @@
             "mode": "debug",
             "program": "${fileDirname}",
             "env": {},
-            "args": [],
-            "showLog": true
+            "args": ["-entorno=local"],
+            "showLog": true,
         }
     ]
 }
