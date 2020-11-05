@@ -20,14 +20,15 @@ func EjecutaQuery(query string) (result *sql.Rows, e error) {
 		return nil, err
 	}
 
-	// cerramos con defer para que no se nos olvide
-	defer db.Close()
 	//con el string que tenemos de entrada hacemos la query
 	result, err = realizaQuery(query, db)
 
 	if err != nil {
 		return nil, err
 	}
+	// cerramos con defer para que no se nos olvide
+	defer db.Close()
+
 	return result, nil
 
 }
