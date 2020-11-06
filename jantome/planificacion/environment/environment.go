@@ -35,5 +35,6 @@ func Loadenvironment(entorno string) {
 	os.LookupEnv("DB_USER")
 	os.LookupEnv("DB_PASSWORD")
 	os.LookupEnv("DB_DATABASE")
+	os.LookupEnv("FILE_HOUR")
 	//******DB2******//
 }
