@@ -27,6 +27,7 @@ var (
 	numdia = fmt.Sprintf("%d", date.YearDay())
 )
 
+//planificar --> planificacion de los jobs segun el calendario correspondiente
 func planificar() {
 	//recuperamos los calendarios que se tienen que planificar
 	//PONEMOS ` en el and, ya que es como lo reconoce al ser numeros en MYSQL
@@ -131,6 +132,7 @@ func planificar() {
 	fmt.Println("Numero de Jobs planficados: ", jobplanif)
 }
 
+//limpia --> Limpieza diaria de la tabla de CM con los finalizados OK
 func limpia() {
 	fmt.Println("Limpieza CM los ejecutados OK...")
 	query := fmt.Sprintf("DELETE FROM ejecucion WHERE estado ='ok'")
@@ -144,6 +146,54 @@ func limpia() {
 	fmt.Println("Fin limpieza...")
 }
 
+func creahoras() {
+	//recuperamos la ruta
+	pathfile, _ := os.LookupEnv("FILE_HOUR")
+	//al nombre del fichero le añadimos el día formato cm
+	pathfile = pathfile + fechacm
+	//creamos el archivo
+	file, err := os.OpenFile(pathfile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		fmt.Println("Error apertura fichero horas", err.Error())
+		os.Exit(1)
+		return
+	}
+	//cerramos el fichero al finalizar la funcion
+	defer file.Close()
+	//Recuperamos las horas que tenemos que planificar
+	query := "SELECT condicionin FROM ejecucion WHERE nombre LIKE 'hora%' AND condicionin > ''"
+	result, err := db2.EjecutaQuery(query)
+	if err != nil {
+		fmt.Println("Error select horas: ", err.Error())
+		os.Exit(1)
+		return
+	}
+	//creamos el struct donde leeremos
+	var hourejecucion structs.Hourejecucion
+	//sw para saber si es la primeravez o no y grabar el salto de linea
+	primeravez := true
+	//recorremos la tabla y vamos guardando en el fichero
+	for result.Next() {
+		//realizamos la lectura
+		err = result.Scan(&hourejecucion.Houreje)
+		if err != nil {
+			fmt.Println("Error en la lectura de las horas", err.Error())
+			os.Exit(1)
+			return
+		}
+		//grabamos en el fichero de salida
+		//contenido := []byte(hourejecucion.Houreje)
+		if primeravez {
+			file.WriteString(hourejecucion.Houreje)
+			primeravez = false
+		} else {
+			valor := ("\n" + hourejecucion.Houreje)
+			file.WriteString(valor)
+		}
+
+	}
+}
+
 func main() {
 	fmt.Println("Comienza planificación...")
 	//recuperamos el entorno de ejecuion para saber las rutas
@@ -155,5 +205,7 @@ func main() {
 	limpia()
 	//planifica
 	planificar()
+	//Creamos el archivo de horas que se utilizara para las horas
+	creahoras()
 	fmt.Println("Fin planificacion...")
 }
