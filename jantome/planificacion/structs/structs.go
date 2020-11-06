@@ -23,3 +23,8 @@ type Ejecucion struct {
 type Calendario struct {
 	Namecalendar string
 }
+
+//Hourejecucion struct de la tabla de ejecuciones para recuperar las horas
+type Hourejecucion struct {
+	Houreje string
+}
