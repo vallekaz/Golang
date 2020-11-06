@@ -161,7 +161,7 @@ func creahoras() {
 	//cerramos el fichero al finalizar la funcion
 	defer file.Close()
 	//Recuperamos las horas que tenemos que planificar
-	query := "SELECT condicionin FROM ejecucion WHERE nombre LIKE 'hora%' AND condicionin > ''"
+	query := "SELECT condicionin FROM ejecucion WHERE nombre LIKE 'hora%' AND condicionin > '' ORDER BY condicionin asc"
 	result, err := db2.EjecutaQuery(query)
 	if err != nil {
 		fmt.Println("Error select horas: ", err.Error())
