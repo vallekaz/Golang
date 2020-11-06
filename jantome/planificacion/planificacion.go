@@ -28,11 +28,6 @@ var (
 )
 
 func planificar() {
-	//recuperamos el entorno de ejecuion para saber las rutas
-	entorno := flag.String("entorno", "", "entorno de ejecución")
-	flag.Parse()
-	//cargamos variables de entorno
-	environment.Loadenvironment(*entorno)
 	//recuperamos los calendarios que se tienen que planificar
 	//PONEMOS ` en el and, ya que es como lo reconoce al ser numeros en MYSQL
 	query := fmt.Sprintf("SELECT nombre FROM calendarios WHERE year = '%s' AND `%s` = 'Y'", anno, numdia)
@@ -151,6 +146,11 @@ func limpia() {
 
 func main() {
 	fmt.Println("Comienza planificación...")
+	//recuperamos el entorno de ejecuion para saber las rutas
+	entorno := flag.String("entorno", "", "entorno de ejecución")
+	flag.Parse()
+	//cargamos variables de entorno
+	environment.Loadenvironment(*entorno)
 	//primero limpia CM de la ejecucion anterior
 	limpia()
 	//planifica
