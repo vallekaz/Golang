@@ -102,6 +102,7 @@ func ejecuta() {
 				consola = "bash"
 				letra = "-c"
 			}
+			fmt.Println(comando)
 			//ejecuta := "go run c:\\gopath\\src\\github.com\\jantome\\" + ejecucion.Nombre + "\\" + ejecucion.Nombre + ".go"
 			c := exec.Command(consola, letra, comando)
 			_, err := c.Output()

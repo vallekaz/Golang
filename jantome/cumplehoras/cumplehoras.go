@@ -149,6 +149,7 @@ func main() {
 					consola = "bash"
 					letra = "-c"
 				}
+				fmt.Println(comando)
 				//de esta manera no casca en caso de que falle el ejecutajob, y seguira ejecutandose el cumple horas
 				c := exec.Command(consola, letra, comando)
 				c.Stdin = os.Stdin
