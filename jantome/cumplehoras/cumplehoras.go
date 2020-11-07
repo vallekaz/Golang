@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"time"
 
 	"github.com/jantome/cumplehoras/structs"
@@ -23,13 +24,34 @@ var (
 	dia = fmt.Sprintf("%d", date.Day())
 	//montamos la fecha de controlm formato YYMMDD
 	fechacm = fmt.Sprintf("%s%s%s", anno[0:2], mes, dia)
+	entorno = flag.String("entorno", "", "entorno de ejecución")
 )
 
 func main() {
-	fmt.Println("Comienza ejecucion...")
+	//Ejemplo ejecuciones para lanzar objetos
+	//Ejecuta y saca la salida directamente
+	/*c := exec.Command("cmd", "/C", "go run c:\\gopath\\src\\github.com\\jantome\\prueba\\main.go")
+	c.Stdin = os.Stdin
+	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
+	c.Run()*/
+
+	//Ejecuta y saca la salida segun lo imprimamos
+	/*c := exec.Command("cmd", "/C", "go run c:\\gopath\\src\\github.com\\jantome\\prueba\\main.go")
+	cout, err := c.Output()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	fmt.Println(string(cout))*/
+
+	fmt.Println("Comienza cumplehoras...")
 	//recuperamos el entorno de ejecucion mediante flags para saber las rutas
-	entorno := flag.String("entorno", "", "entorno de ejecución")
+	//entorno := flag.String("entorno", "", "entorno de ejecución")
 	flag.Parse()
+	//variables inizialidas
+	comando := ""
+	consola := ""
+	letra := ""
 	//cargamos variables de entorno
 	environment.Loadenvironment(*entorno)
 	//Leer fichero
@@ -61,7 +83,7 @@ func main() {
 			//comparamos la hora actual con la del fichero
 			if hora == scanner.Text() {
 				//buscamos el nombre del que tiene la condicion de entrada de la hora
-				sql = fmt.Sprintf("SELECT nombre FROM ejecucion WHERE condicionin = '%s'", scanner.Text())
+				sql = fmt.Sprintf("SELECT nombre FROM ejecucion WHERE condicionin = '%s' AND fechaeje ='%s'", scanner.Text(), fechacm)
 				result, err := db2.EjecutaQuery(sql)
 				if err != nil {
 					fmt.Println("Error select nombre", err.Error())
@@ -79,8 +101,8 @@ func main() {
 					os.Exit(1)
 					return
 				}
-				//una vez tenemos el nombre, realizamos una query para poner todos los estados a OK
-				sql = fmt.Sprintf("UPDATE ejecucion SET estado ='ok' WHERE nombre = '%s'", ejecucion.Nombre)
+				//una vez tenemos el nombre, realizamos una query para poner todos los estados a Ok, de la hora leida en el fichero
+				sql = fmt.Sprintf("UPDATE ejecucion SET estado ='ok' WHERE nombre = '%s' AND fechaeje ='%s'", ejecucion.Nombre, fechacm)
 				_, err = db2.EjecutaQuery(sql)
 
 				if err != nil {
@@ -88,7 +110,7 @@ func main() {
 					os.Exit(1)
 					return
 				}
-				//Ahora de lo actualizado a Ok, buscamos la condicion de salida para actualizar el resto de condicones de entrada
+				//Buscamos la condición de salida que tiene que dejar la hora leida en el fichero
 				sql = fmt.Sprintf("SELECT condicionout FROM ejecucion WHERE nombre ='%s' and condicionout > ''", ejecucion.Nombre)
 				result, err = db2.EjecutaQuery(sql)
 
@@ -103,12 +125,12 @@ func main() {
 				var ejecucion2 structs.Ejecucion2
 				err = result.Scan(&ejecucion2.Condicionout)
 				if err != nil {
-					fmt.Println("Error lectura fichero select condicionout", err.Error())
+					fmt.Println("Error lectura  select condicionout", err.Error())
 					os.Exit(1)
 					return
 				}
-				//montamos query para actualizar las condicones de entrada
-				sql = fmt.Sprintf("UPDATE ejecucion SET estado ='ok' WHERE condicionin = '%s'", ejecucion2.Condicionout)
+				//Actualizamos todas las lineas de la condicion de entrada que estan esperando los jobs (se actualiza con la condición de salida de la hora)
+				sql = fmt.Sprintf("UPDATE ejecucion SET estado ='ok' WHERE condicionin = '%s' AND fechaeje ='%s'", ejecucion2.Condicionout, fechacm)
 				_, err = db2.EjecutaQuery(sql)
 
 				if err != nil {
@@ -116,6 +138,23 @@ func main() {
 					os.Exit(1)
 					return
 				}
+				//ejecutar ejecutajob, para que se lancen los job's con las condiciones de entradas cumplidas
+				//ademas lo hacemos de la manera que no para la ejecucion en caso de que falle
+				if *entorno == "local" {
+					comando = "go run c:\\gopath\\src\\github.com\\jantome\\ejecutajob\\ejecutajob.go -entorno=local"
+					consola = "cmd"
+					letra = "/C"
+				} else {
+					comando = "cd /ejecutable/batch/app, ./ejecutajob"
+					consola = "bash"
+					letra = "-c"
+				}
+				//de esta manera no casca en caso de que falle el ejecutajob, y seguira ejecutandose el cumple horas
+				c := exec.Command(consola, letra, comando)
+				c.Stdin = os.Stdin
+				c.Stdout = os.Stdout
+				c.Stderr = os.Stderr
+				c.Run()
 				t = true
 			}
 			// si la hora actual es menor que la del fichero, tenemos que seguir con esta, ya que significa que todavía
@@ -131,4 +170,5 @@ func main() {
 			}
 		}
 	}
+	fmt.Println("Fin cumplehoras...")
 }
