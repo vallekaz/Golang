@@ -145,7 +145,7 @@ func main() {
 					consola = "cmd"
 					letra = "/C"
 				} else {
-					comando = "sh /ejecutable/batch/app/ejecutajob"
+					comando = "cd /ejecutable/batch/app; ./ejecutajob "
 					consola = "bash"
 					letra = "-c"
 				}
