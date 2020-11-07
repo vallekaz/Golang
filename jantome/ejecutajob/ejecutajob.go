@@ -98,7 +98,7 @@ func ejecuta() {
 				letra = "/C"
 			} else {
 				//ruta linux
-				comando = "cd cd /ejecutable/batch/app, ./" + ejecucion.Nombre
+				comando = "sh /ejecutable/batch/app/" + ejecucion.Nombre
 				consola = "bash"
 				letra = "-c"
 			}
