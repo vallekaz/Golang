@@ -84,12 +84,12 @@ func ejecuta() {
 		//aplantillamos
 		err = result2.Scan(&countEje.Numero)
 		//comprobamos si tiene o no condiciones pendientes
-		if countEje.Numero > 0 {
-			fmt.Println("condiciones pendientes")
-		}
+		//if countEje.Numero > 0 {
+		//	fmt.Println("condiciones pendientes")
+		//}
 
 		if countEje.Numero == 0 {
-			fmt.Println("Ninguna condicion pendiente")
+			//	fmt.Println("Ninguna condicion pendiente")
 			//como no tiene ninguna condicion esperando ejecutamos job
 			//Ejecuta y saca la salida directamente teniendo en cuenta el entorno de ejecucion
 			if *entorno == "local" {
@@ -102,7 +102,6 @@ func ejecuta() {
 				consola = "bash"
 				letra = "-c"
 			}
-			fmt.Println(comando)
 			//ejecuta := "go run c:\\gopath\\src\\github.com\\jantome\\" + ejecucion.Nombre + "\\" + ejecucion.Nombre + ".go"
 			c := exec.Command(consola, letra, comando)
 			_, err := c.Output()
