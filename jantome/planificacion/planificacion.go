@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"time"
 
 	"github.com/jantome/planificacion/environment"
@@ -25,6 +26,8 @@ var (
 	fechacm = fmt.Sprintf("%s%s%s", anno[0:2], mes, dia)
 	//numero día
 	numdia = fmt.Sprintf("%d", date.YearDay())
+	//recuperamos el entorno de ejecuion para saber las rutas
+	entorno = flag.String("entorno", "", "entorno de ejecución")
 )
 
 //planificar --> planificacion de los jobs segun el calendario correspondiente
@@ -146,6 +149,7 @@ func limpia() {
 	fmt.Println("Fin limpieza...")
 }
 
+//creahoras --> Creacion de fichero de horas
 func creahoras() {
 	//recuperamos la ruta
 	pathfile, _ := os.LookupEnv("FILE_HOUR")
@@ -194,10 +198,32 @@ func creahoras() {
 	}
 }
 
+//firsteje --> Primera ejecucion para los que no tienen condicion de entrada
+func firsteje() {
+	comando := ""
+	consola := ""
+	letra := ""
+	//ejecutar ejecutajob, para que se lancen los job's con las condiciones de entradas cumplidas
+	//ademas lo hacemos de la manera que no para la ejecucion en caso de que falle
+	if *entorno == "local" {
+		comando = "go run c:\\gopath\\src\\github.com\\jantome\\ejecutajob\\ejecutajob.go -entorno=local"
+		consola = "cmd"
+		letra = "/C"
+	} else {
+		comando = "cd /ejecutable/batch/app; ./ejecutajob "
+		consola = "bash"
+		letra = "-c"
+	}
+	//de esta manera no casca en caso de que falle el ejecutajob, y seguira ejecutandose el programa de MQ
+	c := exec.Command(consola, letra, comando)
+	c.Stdin = os.Stdin
+	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
+	c.Run()
+}
+
 func main() {
 	fmt.Println("Comienza planificación...")
-	//recuperamos el entorno de ejecuion para saber las rutas
-	entorno := flag.String("entorno", "", "entorno de ejecución")
 	flag.Parse()
 	//cargamos variables de entorno
 	environment.Loadenvironment(*entorno)
@@ -207,5 +233,7 @@ func main() {
 	planificar()
 	//Creamos el archivo de horas que se utilizara para las horas
 	creahoras()
+	//Ejecutamos ejecutajob, por si alguno estuviese sin condicion de entrada
+	firsteje()
 	fmt.Println("Fin planificacion...")
 }
