@@ -22,7 +22,7 @@ func Loadenvironment(entorno string) {
 		}
 	} else {
 		// en caso de que la variable no este activada ponemos la ruta de linux
-		err := godotenv.Load("/ejecutable/online/env/batcharq.env")
+		err := godotenv.Load("/ejecutable/batch/env/batcharq.env")
 		//controlamos error en la apertura del fichero
 		if err != nil {
 			log.Fatal("Error loading .env file")
