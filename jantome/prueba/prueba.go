@@ -6,10 +6,10 @@ import (
 )
 
 func main() {
-	/*entorno := "local"
+	//entorno := "local"
 	batch.Start("prueba", entorno)*/
 	fmt.Println("Hola")
-	/*contador := 90
+	contador := 90
 	cabe := "\n******Estadisticas******"
 	esta1 := "\nRegistros leidos: " + strconv.Itoa(contador)
 	esta2 := "\nRegistros tratados: " + strconv.Itoa(contador-10)
@@ -21,6 +21,6 @@ func main() {
 	batch.FinOk("prueba", entorno)
 	retorno := "100"
 	descripcion := "Error en bla bla lba status.."
-	batch.FinKo("prueba", retorno, descripcion, entorno)*/
+	batch.FinKo("prueba", retorno, descripcion, entorno)
 	os.Exit(0)
 }
