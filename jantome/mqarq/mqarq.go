@@ -30,7 +30,7 @@ func holdea(programa string, fechaeje string) {
 	if programa != "" {
 		if fechaeje != "" {
 			//antes de holdear comprobamos si no esta OK, en caso de estarlo no podemos holdear
-			sql := fmt.Sprintf("SELECT estado WHERE numsec = 1 AND nombre = '%s' AND fechaeje = '%s'", programa, fechaeje)
+			sql := fmt.Sprintf("SELECT estado FROM ejecucion WHERE numsec = 1 AND nombre = '%s' AND fechaeje = '%s'", programa, fechaeje)
 			result, err := db2.EjecutaQuery(sql)
 			if err != nil {
 				log.Println("Error select estado", err.Error())
