@@ -23,7 +23,7 @@ var (
 	//Sin convertir a string
 	//dia := date.Day()
 	//montamos la fecha de controlm formato YYMMDD
-	fechacm = fmt.Sprintf("%s%s%s", anno[0:2], mes, dia)
+	fechacm = fmt.Sprintf("%s%s%s", anno[2:4], mes, dia)
 	//numero día
 	numdia = fmt.Sprintf("%d", date.YearDay())
 	//recuperamos el entorno de ejecuion para saber las rutas
