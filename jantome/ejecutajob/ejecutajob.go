@@ -23,7 +23,7 @@ var (
 	//Convertido a String
 	dia = fmt.Sprintf("%d", date.Day())
 	//montamos la fecha de controlm formato YYMMDD (Este formato para MYSQL como date lo interpreta correctamente)
-	fechacm = fmt.Sprintf("%s%s%s", anno[0:2], mes, dia)
+	fechacm = fmt.Sprintf("%s%s%s", anno[2:4], mes, dia)
 )
 
 func main() {
