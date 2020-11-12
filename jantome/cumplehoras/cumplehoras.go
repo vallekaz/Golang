@@ -23,7 +23,7 @@ var (
 	//Convertido a String
 	dia = fmt.Sprintf("%d", date.Day())
 	//montamos la fecha de controlm formato YYMMDD
-	fechacm = fmt.Sprintf("%s%s%s", anno[0:2], mes, dia)
+	fechacm = fmt.Sprintf("%s%s%s", anno[2:4], mes, dia)
 	entorno = flag.String("entorno", "", "entorno de ejecución")
 )
 
