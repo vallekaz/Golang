@@ -11,3 +11,8 @@ type Jsoncm struct {
 type Ejecucion struct {
 	Condicionout string
 }
+
+//Ejecucion2 struct de la tabla de ejecución para recuperar el estado
+type Ejecucion2 struct {
+	Estado string
+}
