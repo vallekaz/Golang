@@ -29,12 +29,27 @@ func holdea(programa string, fechaeje string) {
 	//comprobamos que esta informado el nombre del programa
 	if programa != "" {
 		if fechaeje != "" {
-			//Actualizamos el estado a ho en la tabla ejecucion y con numsec 1(ya que las condiciones no las queremos tocar)
-			sql := fmt.Sprintf("UPDATE ejecucion SET estado = 'ho' WHERE numsec = 1 AND nombre = '%s' AND fechaeje = '%s'", programa, fechaeje)
-			_, err := db2.EjecutaQuery(sql)
+			//antes de holdear comprobamos si no esta OK, en caso de estarlo no podemos holdear
+			sql := fmt.Sprintf("SELECT estado WHERE numsec = 1 AND nombre = '%s' AND fechaeje = '%s'", programa, fechaeje)
+			result, err := db2.EjecutaQuery(sql)
 			if err != nil {
-				log.Println("Error Update estado", err.Error())
+				log.Println("Error select estado", err.Error())
 			}
+			//solo tendra una linea, por lo que no es necesario el bucle
+			result.Next()
+			var ejecucion2 structs.Ejecucion2
+			//aplantillamos
+			err = result.Scan(&ejecucion2.Estado)
+			//comprobamos el estado para ver si podemos holdea
+			if ejecucion2.Estado != "ok" {
+				//Actualizamos el estado a ho en la tabla ejecucion y con numsec 1(ya que las condiciones no las queremos tocar)
+				sql = fmt.Sprintf("UPDATE ejecucion SET estado = 'ho' WHERE numsec = 1 AND nombre = '%s' AND fechaeje = '%s'", programa, fechaeje)
+				_, err = db2.EjecutaQuery(sql)
+				if err != nil {
+					log.Println("Error Update estado", err.Error())
+				}
+			}
+
 		} else {
 			log.Println("nombre de programa no informado")
 		}
