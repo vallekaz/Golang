@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 	"time"
+
+	"github.com/batcharq/batch/environment"
 )
 
 var (
@@ -24,9 +26,9 @@ var (
 )
 
 //Start funcion que se utilizara para generar el fichero de log nada más empezar un proceso batch
-func Start(nombre string) {
+func Start(nombre string, entorno string) {
 	//apertura del fichero, nos devuelve file para que podamos cerrarlo cuando finalicemos la funcion
-	file := OpenFicher(nombre)
+	file := OpenFicher(nombre, entorno)
 	//Comprobamos el tipo de error para ver que tenemos que guardar
 	infoLogger.Println("Start", nombre)
 	//Cerramos fichero
@@ -34,9 +36,12 @@ func Start(nombre string) {
 }
 
 //OpenFicher funcion que se invocara en todos los sitios para la apertura del fichero
-func OpenFicher(nombre string) (file *os.File) {
+func OpenFicher(nombre string, entorno string) (file *os.File) {
 	//obtenemos la ruta donde se guardaran los logs
-	pathLog := "./" + nombre + formateado
+	//pathLog := "./" + nombre + formateado
+	environment.Loadenvironment(entorno)
+	pathLog, _ := os.LookupEnv("PATH_LOG")
+	pathLog = pathLog + nombre + formateado
 	/*pathLog, _ := os.LookupEnv("PATH_LOG")*/
 	//apertura del fichero o creacion del mismo en caso de no existir
 	file, err := os.OpenFile(pathLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
@@ -52,9 +57,9 @@ func OpenFicher(nombre string) (file *os.File) {
 }
 
 //FinOk funcion para la finalización correcta del proceso batch
-func FinOk(nombre string) {
+func FinOk(nombre string, entorno string) {
 	//apertura del fichero, nos devuelve file para que podamos cerrarlo cuando finalicemos la funcion
-	file := OpenFicher(nombre)
+	file := OpenFicher(nombre, entorno)
 	infoLogger.Println("Finish",
 		nombre,
 		"Tiempo de ejecucion: ",
@@ -64,8 +69,8 @@ func FinOk(nombre string) {
 }
 
 // Impr funcion que servirar para imprimir toda la info que creamos necesaria. Por ejempo estadisticas o display's
-func Impr(nombre string, inf string, tipo string) {
-	file := OpenFicher(nombre)
+func Impr(nombre string, inf string, tipo string, entorno string) {
+	file := OpenFicher(nombre, entorno)
 	switch tipo {
 	//warning
 	case "w":
@@ -84,8 +89,8 @@ func Impr(nombre string, inf string, tipo string) {
 }
 
 //FinKo funcion para imprimir error cuando esta KO
-func FinKo(nombre string, retorno string, descripcion string) {
-	file := OpenFicher(nombre)
+func FinKo(nombre string, retorno string, descripcion string, entorno string) {
+	file := OpenFicher(nombre, entorno)
 	errorLogger.Println("\n¡¡¡¡¡¡Error!!!!!!\n",
 		"Retorno: ",
 		retorno,
