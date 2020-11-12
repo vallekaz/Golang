@@ -89,6 +89,12 @@ func rerun(programa string, fechaeje string) {
 	//comprobamos que esta informado el nombre del programa
 	if programa != "" {
 		if fechaeje != "" {
+			//poner el job que se pide hacer rerun como eje
+			sql := fmt.Sprintf("UPDATE ejecucion SET estado = 'ej' WHERE nombre = '%s' AND numsec = 1 AND fechaeje = '%s'", programa, fechaeje)
+			_, err := db2.EjecutaQuery(sql)
+			if err != nil {
+				log.Println("Update Ko error")
+			}
 			//ejecutar el job indicado controlando el error
 			if *entorno == "local" {
 				comando = "go run c:\\gopath\\src\\github.com\\jantome\\" + programa + "\\" + programa + ".go"
@@ -101,21 +107,21 @@ func rerun(programa string, fechaeje string) {
 				letra = "-c"
 			}
 			c := exec.Command(consola, letra, comando)
-			_, err := c.Output()
+			_, err = c.Output()
 
 			//controlamos el error, y si falla actualizamos la ejecucion como fallida
 			if err != nil {
 				//Este print le dejo por el momento, pero sera el job el que deje un log de salida
 				fmt.Println(err.Error())
 				//actualizamos a fallido la ejecucion
-				sql := fmt.Sprintf("UPDATE ejecucion SET estado = 'ko' WHERE nombre = '%s' AND numsec = 1 AND fechaeje = '%s'", programa, fechaeje)
+				sql = fmt.Sprintf("UPDATE ejecucion SET estado = 'ko' WHERE nombre = '%s' AND numsec = 1 AND fechaeje = '%s'", programa, fechaeje)
 				_, err := db2.EjecutaQuery(sql)
 				if err != nil {
 					log.Println("Update Ko error")
 				}
 			} else {
 				//em caso de que finalice OK actualizmaos
-				sql := fmt.Sprintf("UPDATE ejecucion SET estado= 'ok' WHERE nombre = '%s' AND fechaeje = '%s'", programa, fechaeje)
+				sql = fmt.Sprintf("UPDATE ejecucion SET estado= 'ok' WHERE nombre = '%s' AND fechaeje = '%s'", programa, fechaeje)
 				_, err = db2.EjecutaQuery(sql)
 				//controlamos error
 				if err != nil {
