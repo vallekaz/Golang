@@ -90,7 +90,14 @@ func ejecuta() {
 
 		if countEje.Numero == 0 {
 			//	fmt.Println("Ninguna condicion pendiente")
-			//como no tiene ninguna condicion esperando ejecutamos job
+			//como no tiene ninguna condicion esperando ejecutamos job pero antes actualizmos a en ejecucion
+			sql3 := fmt.Sprintf("UPDATE ejecucion SET estado = 'ej' WHERE nombre = '%s' AND numsec = 1 AND fechaeje = '%s'", ejecucion.Nombre, fechacm)
+			_, err = db2.EjecutaQuery(sql3)
+			if err != nil {
+				fmt.Println("Error update KO", err.Error())
+				os.Exit(1)
+				return
+			}
 			//Ejecuta y saca la salida directamente teniendo en cuenta el entorno de ejecucion
 			if *entorno == "local" {
 				comando = "go run c:\\gopath\\src\\github.com\\jantome\\" + ejecucion.Nombre + "\\" + ejecucion.Nombre + ".go"
@@ -110,7 +117,7 @@ func ejecuta() {
 				//Este print le dejo por el momento, pero sera el job el que deje un log de salida
 				fmt.Println(err.Error())
 				//actualizamos a fallido la ejecucion
-				sql3 := fmt.Sprintf("UPDATE ejecucion SET estado = 'ko' WHERE nombre = '%s' AND numsec = 1 AND fechaeje = '%s'", ejecucion.Nombre, fechacm)
+				sql3 = fmt.Sprintf("UPDATE ejecucion SET estado = 'ko' WHERE nombre = '%s' AND numsec = 1 AND fechaeje = '%s'", ejecucion.Nombre, fechacm)
 				_, err = db2.EjecutaQuery(sql3)
 				if err != nil {
 					fmt.Println("Error update KO", err.Error())
