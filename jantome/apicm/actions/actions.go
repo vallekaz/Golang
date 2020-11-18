@@ -205,11 +205,11 @@ func getEjecucion(response http.ResponseWriter, request *http.Request) {
 		if sipie {
 			var pagmax float64
 			//montamos url prev y next
-			var finejecucionjson structs.Finejecucionjson
-			finejecucionjson.Pagdet.Links.Href = make(map[string]string)
+			var piepaginacion structs.Piepaginacion
+			piepaginacion.Pagdet.Links.Href = make(map[string]string)
 			if page > 1 {
-				finejecucionjson.Pagdet.Links.Href["prev"] = fmt.Sprintf("/cm/v1/ejecuciones?limit=%d&page=%d", limit, page-1)
-				finejecucionjson.Pagdet.Pagprev = page - 1
+				piepaginacion.Pagdet.Links.Href["prev"] = fmt.Sprintf("/cm/v1/ejecuciones?limit=%d&page=%d", limit, page-1)
+				piepaginacion.Pagdet.Pagprev = page - 1
 			}
 			//para armar el next cuando corresponde necesitamos saber el número de paginas que tendra
 			//hacemos un select count
@@ -259,18 +259,18 @@ func getEjecucion(response http.ResponseWriter, request *http.Request) {
 			//comparamos pero si page no esta informada le ponemos dos ya que empezmos en la 1
 			if page == 0 {
 				if 2 <= pagmax64 {
-					finejecucionjson.Pagdet.Links.Href["next"] = fmt.Sprintf("/cm/v1/ejecuciones?limit=%d&page=%d", limit, 2)
-					finejecucionjson.Pagdet.Pagnext = 2
+					piepaginacion.Pagdet.Links.Href["next"] = fmt.Sprintf("/cm/v1/ejecuciones?limit=%d&page=%d", limit, 2)
+					piepaginacion.Pagdet.Pagnext = 2
 				}
 			} else {
 				if page < pagmax64 {
-					finejecucionjson.Pagdet.Links.Href["next"] = fmt.Sprintf("/cm/v1/ejecuciones?limit=%d&page=%d", limit, page+1)
-					finejecucionjson.Pagdet.Pagnext = page + 1
+					piepaginacion.Pagdet.Links.Href["next"] = fmt.Sprintf("/cm/v1/ejecuciones?limit=%d&page=%d", limit, page+1)
+					piepaginacion.Pagdet.Pagnext = page + 1
 				}
 			}
-			finejecucionjson.Pagdet.Pagmax = pagmax64
+			piepaginacion.Pagdet.Pagmax = pagmax64
 			//creamos json
-			JsResponser, err := json.Marshal(finejecucionjson)
+			JsResponser, err := json.Marshal(piepaginacion)
 			//Controlar el error y devolver un 500
 			if err != nil {
 				//Informamos el json
@@ -614,7 +614,7 @@ func HandlerPlanificacion(response http.ResponseWriter, request *http.Request) {
 		getPlanificacion(response, request)
 	//tenemos que habilitar el metodo options, para que se puedan verificar los cors
 	case "OPTIONS":
-		options1(response, request)
+		options2(response, request)
 	default:
 		jsonerror.UserMessage = fmt.Sprintf("Not implemented Method %s", request.Method)
 		//Montamos el json de error
@@ -652,8 +652,48 @@ func HandlerPlanificacion(response http.ResponseWriter, request *http.Request) {
 //getPlanificacion para recupera los datos de la tabla de planificacion (solo recuperar los que tengan el ejecucion informado
 //que sera el primero de planificacion, del que dependera condiciones de entrada salida etc..)
 func getPlanificacion(response http.ResponseWriter, request *http.Request) {
-	//montamos query
-	sql := "SELECT nombre, calendario, user_alta, timalta, user_modif, timesmod FROM planificacion WHERE ejecucion = 'n'"
+	//sw para saber si metemos pie
+	sipie := false
+	sql := ""
+	//control de paginación
+	var ofsset int64
+	var page int64
+	var limit int64
+	//obtenemos las variables de la url
+	pageurl, ok := request.URL.Query()["page"]
+	limiturl, ok2 := request.URL.Query()["limit"]
+	//comprobamos que extrae datos de la variable page
+	if ok && len(pageurl[0]) > 0 {
+		//nos quedamos con la primera ocurrencia por si existiese alguna más
+		pageurl2 := pageurl[0]
+		//convertimos a int
+		page, _ = strconv.ParseInt(pageurl2, 10, 64)
+	}
+	//comprobamos que extrae datos de la variable limit
+	if ok2 && len(limiturl[0]) > 0 {
+		//nos quedamos con la primera ocurrencia por si existiese alguna más
+		limiturl2 := limiturl[0]
+		//convertimos a int
+		limit, _ = strconv.ParseInt(limiturl2, 10, 64)
+	}
+	//si tenemos dato en page, restamos una a page y lo multiplicamos por limit
+	//esto es xk llegara siempre la pagina siguiente, es decir la 0 es la pagina 1, la 1 la 2 etc..
+	if page > 0 {
+		ofsset = page - 1
+		ofsset = ofsset * limit
+	}
+	//montamos query segun los parametros recuperados por URL
+	if limit > 0 && page == 0 {
+		sql = fmt.Sprintf("SELECT nombre, calendario, user_alta, timalta, user_modif, timesmod FROM planificacion WHERE ejecucion = 'n' LIMIT  %d", limit)
+		sipie = true
+	} else {
+		if limit > 0 && page > 0 {
+			sql = fmt.Sprintf("SELECT nombre, calendario, user_alta, timalta, user_modif, timesmod FROM planificacion WHERE ejecucion = 'n' LIMIT %d OFFSET %d", limit, ofsset)
+			sipie = true
+		} else {
+			sql = "SELECT nombre, calendario, user_alta, timalta, user_modif, timesmod FROM planificacion WHERE ejecucion = 'n'"
+		}
+	}
 	//Ejecutamos la query
 	result, err := db2.EjecutaQuery(sql)
 	//Controlar el error para devolver un 500
@@ -675,9 +715,12 @@ func getPlanificacion(response http.ResponseWriter, request *http.Request) {
 		response.Write(JsResponser)
 		return
 	}
+	//Inicializacion de datos
+	sidatos := false
 	//Creamos var dond estara la lectura
 	var planificacion structs.Planificacion
 	for result.Next() {
+		sidatos = true
 		//hacemos un scan(aplantillar) por cada lectura
 		err := result.Scan(&planificacion.Nombre, &planificacion.Calendario, &planificacion.Useralta, &planificacion.Timalta, &planificacion.Usermod, &planificacion.Timesmod)
 		//Controlar el error y devolver un 500
@@ -725,4 +768,115 @@ func getPlanificacion(response http.ResponseWriter, request *http.Request) {
 		//devolvemos la respuesta
 		response.Write(JsResponser)
 	}
+	if !sidatos {
+		//movemos 204 al error
+		response.WriteHeader(http.StatusNoContent)
+		return
+	}
+	if sidatos {
+		if sipie {
+			var pagmax float64
+			//montamos url prev y next
+			var piepaginacion structs.Piepaginacion
+			piepaginacion.Pagdet.Links.Href = make(map[string]string)
+			if page > 1 {
+				piepaginacion.Pagdet.Links.Href["prev"] = fmt.Sprintf("/cm/v1/planificacion?limit=%d&page=%d", limit, page-1)
+				piepaginacion.Pagdet.Pagprev = page - 1
+			}
+			//para armar el next cuando corresponde necesitamos saber el número de paginas que tendra
+			//hacemos un select count
+			sql = "SELECT COUNT(*) FROM planificacion WHERE ejecucion = 'n'"
+			result, err = db2.EjecutaQuery(sql)
+			//solo tendra un registro por lo que no hace falta que recorramos toda la tabla
+			var planificacionout structs.Planificacionout
+			result.Next()
+			err = result.Scan(&planificacionout.Count)
+			//Controlar el error y devolver un 500
+			if err != nil {
+				//json de error
+				jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+				jsonerror.InternalMessage = fmt.Sprintf("Error select max. Descripción: %s", err.Error())
+				JsResponser, err := json.Marshal(jsonerror)
+				//si falla la generacion damos error grave
+				if err != nil {
+					http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+					return
+				}
+				//Creamos cabecera
+				response.Header().Set("Content-Type", "application/json")
+				//movemos 500 al error
+				response.WriteHeader(http.StatusInternalServerError)
+				//grabamos el json de error
+				response.Write(JsResponser)
+				return
+			}
+			//convertimos el resultado del count a float64
+			countfloat := float64(planificacionout.Count)
+			//convertimos limit en float64 para poder dividir
+			limitfloat := float64(limit)
+			//Dividmos
+			divison := countfloat / limitfloat
+			//redondeamos por funcion ya que quiero que siempre redonde hacia arriba
+			t := math.Trunc(divison)
+			//Si el resultado es 0 significa que es un número entero por lo la paginacion es exacta
+			if math.Abs(divison-t) != 0 {
+				if math.Abs(divison-t) >= 0.5 || math.Abs(divison-t) < 0.5 {
+					pagmax = t + math.Copysign(1, divison)
+				}
+			} else {
+				pagmax = divison
+			}
+			//convertimos pagmax a int64 para poder trabajar con el
+			pagmax64 := int64(pagmax)
+			//comparamos pero si page no esta informada le ponemos dos ya que empezmos en la 1
+			if page == 0 {
+				if 2 <= pagmax64 {
+					piepaginacion.Pagdet.Links.Href["next"] = fmt.Sprintf("/cm/v1/planificacion?limit=%d&page=%d", limit, 2)
+					piepaginacion.Pagdet.Pagnext = 2
+				}
+			} else {
+				if page < pagmax64 {
+					piepaginacion.Pagdet.Links.Href["next"] = fmt.Sprintf("/cm/v1/planificacion?limit=%d&page=%d", limit, page+1)
+					piepaginacion.Pagdet.Pagnext = page + 1
+				}
+			}
+			piepaginacion.Pagdet.Pagmax = pagmax64
+			//creamos json
+			JsResponser, err := json.Marshal(piepaginacion)
+			//Controlar el error y devolver un 500
+			if err != nil {
+				//Informamos el json
+				jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+				jsonerror.InternalMessage = fmt.Sprintf("Error json2. Descripción: %s", err.Error())
+				JsResponser, err := json.Marshal(jsonerror)
+				//si vuelve a fallar la generacion, ya grabamos en log
+				if err != nil {
+					http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+					return
+				}
+				//Creamos cabecera
+				response.Header().Set("Content-Type", "application/json")
+				//movemos 500 al error
+				response.WriteHeader(http.StatusInternalServerError)
+				//grabamos el json de error
+				response.Write(JsResponser)
+				return
+			}
+			//creamos cabecera de respuesta
+			response.Header().Set("Content-Type", "application/json")
+			//devolvemos la respuesta
+			response.Write(JsResponser)
+		}
+	}
+}
+
+//options2 para los cors de esta api
+func options2(response http.ResponseWriter, request *http.Request) {
+	response.Header().Set("Access-Control-Allow-Origin", "*")
+	//Get lista
+	//Put update
+	//Post create
+	//Delete delete
+	response.Header().Set("Access-Control-Allow-Methods", "GET, PUT, OPTIONS")
+	return
 }

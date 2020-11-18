@@ -28,8 +28,8 @@ type Ejecucioncount struct {
 	Count int64
 }
 
-//Finejecucionjson pie de ejecucion que contendra la información necesaria para la paginacion
-type Finejecucionjson struct {
+//Piepaginacion pie de ejecucion que contendra la información necesaria para la paginacion
+type Piepaginacion struct {
 	Pagdet struct {
 		Links struct {
 			Href map[string]string `json:"href,omitempty"`
@@ -58,4 +58,9 @@ type Planificacion struct {
 	Timalta    string `json:"timalta,omitempty"`
 	Usermod    string `json:"usermod,omitempty"`
 	Timesmod   string `json:"timesmod,omitempty"`
+}
+
+//Planificacionout struct para el json con el número de planificacion
+type Planificacionout struct {
+	Count int64 `json:"condicionout"`
 }
