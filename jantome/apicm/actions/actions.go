@@ -305,7 +305,7 @@ func options1(response http.ResponseWriter, request *http.Request) {
 	return
 }
 
-//HandlerCondicionin condiciones de entrada
+//HandlerCondicionin condiciones de entrada --> OK
 func HandlerCondicionin(response http.ResponseWriter, request *http.Request) {
 	//Methodos permitidos GET-OPTIONS
 	switch request.Method {
@@ -349,7 +349,7 @@ func HandlerCondicionin(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-//getCondicionnin condiciones de salida en json
+//getCondicionnin condiciones de entrada en json --> Arreglado json de salida --> OK
 func getCondicionin(response http.ResponseWriter, request *http.Request) {
 	//Creamos la variable necesaria
 	fechaeje2 := ""
@@ -403,9 +403,14 @@ func getCondicionin(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 	//creamos bucle para sacar las condiciones
+	// Variable de lectura
 	var condicionin structs.Condicionin
-	//sw para saber si tenemos datos o no
+	//Variable para la acumulacion del json de salida
+	jsoncondicionin := []structs.Condicionin{}
+	//Sw para saber si sacamos datos o no
+	sidatos := false
 	for result.Next() {
+		sidatos = true
 		//aplantillamos en el struct de salida
 		err = result.Scan(&condicionin.Condicionin)
 		//Controlar el error y devolver un 500
@@ -427,9 +432,12 @@ func getCondicionin(response http.ResponseWriter, request *http.Request) {
 			response.Write(JsResponser)
 			return
 		}
-		//Como no hemos tenido error creamos el json de salida
-		JsResponser, err := json.Marshal(condicionin)
-		//Controlar el error y devolver un 500
+		//Acumulamos en el json
+		jsoncondicionin = append(jsoncondicionin, condicionin)
+	}
+	//al salir del for es cuando creamos el json siempre y cuando tengamos algo en la lectura
+	if sidatos {
+		JsResponser, err := json.Marshal(jsoncondicionin)
 		if err != nil {
 			//Informamos el json
 			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
@@ -448,14 +456,18 @@ func getCondicionin(response http.ResponseWriter, request *http.Request) {
 			response.Write(JsResponser)
 			return
 		}
-		//creamos cabecera de respuesta
 		response.Header().Set("Content-Type", "application/json")
-		//devolvemos la respuesta
 		response.Write(JsResponser)
+	}
+	//Si no tenemos datos sacamos 204
+	if !sidatos {
+		//movemos 204 al error
+		response.WriteHeader(http.StatusNoContent)
+		return
 	}
 }
 
-//HandlerCondicionout condiciones de entrada
+//HandlerCondicionout condiciones de salida --> OK
 func HandlerCondicionout(response http.ResponseWriter, request *http.Request) {
 	//Methodos permitidos GET-OPTIONS
 	switch request.Method {
@@ -499,7 +511,7 @@ func HandlerCondicionout(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-//getCondicionnout condiciones de salida en json
+//getCondicionnout condiciones de salida en json --> Arreglado json de salida --> Ok
 func getCondicionout(response http.ResponseWriter, request *http.Request) {
 	//Creamos la variable necesaria
 	fechaeje2 := ""
@@ -553,9 +565,14 @@ func getCondicionout(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 	//creamos bucle para sacar las condiciones
+	//Variable para la lectura
 	var condicionout structs.Condicionout
+	//Variable para la acumulacion
+	jsoncondicionout := []structs.Condicionout{}
 	//sw para saber si tenemos datos o no
+	sidatos := false
 	for result.Next() {
+		sidatos = true
 		//aplantillamos en el struct de salida
 		err = result.Scan(&condicionout.Condicionout)
 		//Controlar el error y devolver un 500
@@ -577,9 +594,14 @@ func getCondicionout(response http.ResponseWriter, request *http.Request) {
 			response.Write(JsResponser)
 			return
 		}
-		//Como no hemos tenido error creamos el json de salida
-		JsResponser, err := json.Marshal(condicionout)
-		//Controlar el error y devolver un 500
+		//por cada lectura acumulamos
+		jsoncondicionout = append(jsoncondicionout, condicionout)
+	}
+	//generamos json en caso de tener datos
+	if sidatos {
+		//creamos json con el valor acumulado
+		JsResponser, err := json.Marshal(jsoncondicionout)
+		//error en la generacion del json
 		if err != nil {
 			//Informamos el json
 			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
@@ -602,6 +624,12 @@ func getCondicionout(response http.ResponseWriter, request *http.Request) {
 		response.Header().Set("Content-Type", "application/json")
 		//devolvemos la respuesta
 		response.Write(JsResponser)
+	}
+	//Si no tenemos datos sacamos 204
+	if !sidatos {
+		//movemos 204 al error
+		response.WriteHeader(http.StatusNoContent)
+		return
 	}
 }
 
