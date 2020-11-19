@@ -44,11 +44,12 @@ func holdea(programa string, fechaeje string) {
 			if ejecucion2.Estado != "ok" {
 				//Actualizamos el estado a ho en la tabla ejecucion y con numsec 1(ya que las condiciones no las queremos tocar)
 				sql = fmt.Sprintf("UPDATE ejecucion SET estado = 'ho' WHERE numsec = 1 AND nombre = '%s' AND fechaeje = '%s'", programa, fechaeje)
-				_, err = db2.EjecutaQuery(sql)
+				result, err = db2.EjecutaQuery(sql)
 				if err != nil {
 					log.Println("Error Update estado", err.Error())
 				}
 			}
+			defer result.Close()
 
 		} else {
 			log.Println("nombre de programa no informado")
@@ -68,7 +69,7 @@ func free(programa string, fechaeje string) {
 			//Actualizamos el estado a pl en la tabla ejecucion y con numsec 1(ya que las condiciones no las queremos tocar)
 			//y ejecutamos ejecutajobs
 			sql := fmt.Sprintf("UPDATE ejecucion SET estado = 'pl' WHERE numsec = 1 AND nombre = '%s' AND fechaeje = '%s'", programa, fechaeje)
-			_, err := db2.EjecutaQuery(sql)
+			result, err := db2.EjecutaQuery(sql)
 			if err != nil {
 				log.Println("Error Update estado", err.Error())
 			}
@@ -83,6 +84,8 @@ func free(programa string, fechaeje string) {
 				consola = "bash"
 				letra = "-c"
 			}
+			//cerramos conexión con myusql
+			defer result.Close()
 			//de esta manera no casca en caso de que falle el ejecutajob, y seguira ejecutandose el programa de MQ
 			c := exec.Command(consola, letra, comando)
 			c.Stdin = os.Stdin
@@ -106,7 +109,7 @@ func rerun(programa string, fechaeje string) {
 		if fechaeje != "" {
 			//poner el job que se pide hacer rerun como eje
 			sql := fmt.Sprintf("UPDATE ejecucion SET estado = 'ej' WHERE nombre = '%s' AND numsec = 1 AND fechaeje = '%s'", programa, fechaeje)
-			_, err := db2.EjecutaQuery(sql)
+			result, err := db2.EjecutaQuery(sql)
 			if err != nil {
 				log.Println("Update Ko error")
 			}
@@ -130,14 +133,15 @@ func rerun(programa string, fechaeje string) {
 				fmt.Println(err.Error())
 				//actualizamos a fallido la ejecucion
 				sql = fmt.Sprintf("UPDATE ejecucion SET estado = 'ko' WHERE nombre = '%s' AND numsec = 1 AND fechaeje = '%s'", programa, fechaeje)
-				_, err := db2.EjecutaQuery(sql)
+				result, err := db2.EjecutaQuery(sql)
+				defer result.Close()
 				if err != nil {
 					log.Println("Update Ko error")
 				}
 			} else {
 				//em caso de que finalice OK actualizmaos
 				sql = fmt.Sprintf("UPDATE ejecucion SET estado= 'ok' WHERE nombre = '%s' AND fechaeje = '%s'", programa, fechaeje)
-				_, err = db2.EjecutaQuery(sql)
+				result, err = db2.EjecutaQuery(sql)
 				//controlamos error
 				if err != nil {
 					log.Println("Update OK error")
@@ -161,6 +165,7 @@ func rerun(programa string, fechaeje string) {
 					}
 				}
 			}
+			defer result.Close()
 		} else {
 			log.Println("fechaeje no informada")
 		}
@@ -179,13 +184,13 @@ func petic(programa string, fechaeje string) {
 			//Realizmos un insert con el nombre del programa y la fecha
 			sql := fmt.Sprintf("INSERT INTO ejecucion VALUES('%s', 1, '%s', '','','pl')", programa, fechaeje)
 			log.Println(sql)
-			_, err := db2.EjecutaQuery(sql)
+			result, err := db2.EjecutaQuery(sql)
 			if err != nil {
 				log.Println("Error Inser Petic", err.Error())
 			}
 			//para saber que es a petición cremos una condicion de peticion
 			sql = fmt.Sprintf("INSERT INTO ejecucion VALUES('%s', 2, '%s', 'petic-%s','','ok')", programa, fechaeje, programa)
-			_, err = db2.EjecutaQuery(sql)
+			result, err = db2.EjecutaQuery(sql)
 			if err != nil {
 				log.Println("Error Inser Petci", err.Error())
 			} else {
@@ -208,6 +213,9 @@ func petic(programa string, fechaeje string) {
 				c.Stderr = os.Stderr
 				c.Run()
 			}
+			//como el proceso esta en continua ejecucion, no finaliza, y para no dejar en la BBDD conexiones abiertas,
+			//cerramos result
+			defer result.Close()
 		} else {
 			log.Println("nombre de programa no informado")
 		}
