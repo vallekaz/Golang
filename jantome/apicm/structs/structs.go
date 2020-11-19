@@ -1,13 +1,13 @@
 package structs
 
-//Ejecucion estructura de la tabla
-type Ejecucion struct {
+//Tabejecucion estructura de la tabla
+type Tabejecucion struct {
 	Nombre   string `json:"nombre"`
 	Fechaeje string `json:"fechaEje"`
 	Estado   string `json:"estado"`
 }
 
-//Ejecucionjson estructura de la tabla
+//Ejecucionjson json de salida con la información de la tabla de ejecución
 type Ejecucionjson struct {
 	Nombre   string `json:"nombre"`
 	Fechaeje string `json:"fechaEje"`
@@ -17,20 +17,10 @@ type Ejecucionjson struct {
 	} `json:"links,omitempty"`
 }
 
-//Jsonerror estructura del json de error
-type Jsonerror struct {
-	UserMessage     string `json:"userMessage"`
-	InternalMessage string `json:"internalMessage,omitempty"`
-}
-
-//Ejecucioncount structura para el select count
-type Ejecucioncount struct {
-	Count int64
-}
-
-//Piepaginacion pie de ejecucion que contendra la información necesaria para la paginacion
-type Piepaginacion struct {
-	Pagdet struct {
+//Pieejecucion pie de ejecucion que contendra la información necesaria para la paginacion
+type Pieejecucion struct {
+	Content []Ejecucionjson `json:"data"`
+	Pagdet  struct {
 		Links struct {
 			Href map[string]string `json:"href,omitempty"`
 		}
@@ -38,6 +28,17 @@ type Piepaginacion struct {
 		Pagnext int64 `json:"pagnext,omitempty"`
 		Pagprev int64 `json:"pagprev,omitempty"`
 	} `json:"pagination_details"`
+}
+
+//Ejecucioncount structura para el select count
+type Ejecucioncount struct {
+	Count int64
+}
+
+//Jsonerror estructura del json de error
+type Jsonerror struct {
+	UserMessage     string `json:"userMessage"`
+	InternalMessage string `json:"internalMessage,omitempty"`
 }
 
 //Condicionin struct para el json con las condiciones de entrada
@@ -50,8 +51,10 @@ type Condicionout struct {
 	Condicionout string `json:"condicionout"`
 }
 
-//Planificacion struct para la lectura de la tabla y para mostrar en el json
-type Planificacion struct {
+//Tabplanificacion struct para la lectura de la tabla y para mostrar en el json
+//La lectura de la tabla tambien sirve como Json de salida. Ya que no tendra link's de salida, por lo que no creamos
+//ningun struct más como en el caso de ejecucion
+type Tabplanificacion struct {
 	Nombre     string `json:"name"`
 	Calendario string `json:"calendar,omitempty"`
 	Useralta   string `json:"useralt,omitempty"`
@@ -60,7 +63,34 @@ type Planificacion struct {
 	Timesmod   string `json:"timesmod,omitempty"`
 }
 
-//Planificacionout struct para el json con el número de planificacion
-type Planificacionout struct {
+//Pieplanificacion pie de ejecucion que contendra la información necesaria para la paginacion
+type Pieplanificacion struct {
+	Content []Tabplanificacion `json:"data"`
+	Pagdet  struct {
+		Links struct {
+			Href map[string]string `json:"href,omitempty"`
+		}
+		Pagmax  int64 `json:"pagcount,omitempty"`
+		Pagnext int64 `json:"pagnext,omitempty"`
+		Pagprev int64 `json:"pagprev,omitempty"`
+	} `json:"pagination_details"`
+}
+
+//Planificacioncount struct para el json con el número de planificacion
+type Planificacioncount struct {
 	Count int64 `json:"condicionout"`
+}
+
+//Putplanificacion update de la tabla planificacion (se actualizara calendario y usuermodifi)
+type Putplanificacion struct {
+	Name     string `json:"name"`
+	Calendar string `json:"calendar"`
+	Usermod  string `json:"usermod"`
+}
+
+//Postplanificacion alta en la tabla de planificacion
+type Postplanificacion struct {
+	Name     string `json:"name"`
+	Calendar string `json:"calendar"`
+	Useralt  string `json:"useralt"`
 }
