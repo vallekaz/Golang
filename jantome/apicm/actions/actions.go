@@ -165,7 +165,7 @@ func getEjecucion(response http.ResponseWriter, request *http.Request) {
 			return
 		}
 		//aplantillamos la lectura en el formato de json que vamos a mostrar
-		ejecucionjson.Nombre = tabejecucion.Nombre
+		ejecucionjson.Name = tabejecucion.Nombre
 		ejecucionjson.Fechaeje = tabejecucion.Fechaeje
 		ejecucionjson.Estado = tabejecucion.Estado
 		//Montamos las Url's que se pueden usar
@@ -316,7 +316,7 @@ func options1(response http.ResponseWriter, request *http.Request) {
 	return
 }
 
-//HandlerCondicionin condiciones de entrada --> OK
+//HandlerCondicionin condiciones de entrada
 func HandlerCondicionin(response http.ResponseWriter, request *http.Request) {
 	//Methodos permitidos GET-OPTIONS
 	switch request.Method {
@@ -360,7 +360,7 @@ func HandlerCondicionin(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-//getCondicionnin condiciones de entrada en json --> Arreglado json de salida --> OK
+//getCondicionnin condiciones de entrada en json
 func getCondicionin(response http.ResponseWriter, request *http.Request) {
 	//Creamos la variable necesaria
 	fechaeje2 := ""
@@ -392,7 +392,7 @@ func getCondicionin(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 	//Query para recuperar todas las condiciones de entrada
-	sql := fmt.Sprintf("SELECT condicionin FROM ejecucion WHERE nombre ='%s' AND condicionin > '' and FECHAEJE ='%s'", id, fechaeje2)
+	sql := fmt.Sprintf("SELECT condicionin FROM ejecucion WHERE nombre ='%s' AND condicionin > '' and FECHAEJE ='%s' AND estado ='' ", id, fechaeje2)
 	result, err := db2.EjecutaQuery(sql)
 	//Controlar el error para devolver un 500
 	if err != nil {
@@ -478,7 +478,7 @@ func getCondicionin(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-//HandlerCondicionout condiciones de salida --> OK
+//HandlerCondicionout condiciones de salida
 func HandlerCondicionout(response http.ResponseWriter, request *http.Request) {
 	//Methodos permitidos GET-OPTIONS
 	switch request.Method {
@@ -522,7 +522,7 @@ func HandlerCondicionout(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-//getCondicionnout condiciones de salida en json --> Arreglado json de salida --> Ok
+//getCondicionnout condiciones de salida en json --> Arreglado json de salida
 func getCondicionout(response http.ResponseWriter, request *http.Request) {
 	//Creamos la variable necesaria
 	fechaeje2 := ""
@@ -554,7 +554,7 @@ func getCondicionout(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 	//Query para recuperar todas las condiciones de entrada
-	sql := fmt.Sprintf("SELECT condicionout FROM ejecucion WHERE nombre ='%s' AND condicionout > '' and FECHAEJE ='%s'", id, fechaeje2)
+	sql := fmt.Sprintf("SELECT condicionout FROM ejecucion WHERE nombre ='%s' AND condicionout > '' and FECHAEJE ='%s' and estado =''", id, fechaeje2)
 	result, err := db2.EjecutaQuery(sql)
 	//Controlar el error para devolver un 500
 	if err != nil {
