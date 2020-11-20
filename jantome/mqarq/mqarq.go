@@ -116,7 +116,7 @@ func rerun(programa string, fechaeje string) {
 			}
 			//ejecutar el job indicado controlando el error
 			if *entorno == "local" {
-				comando = "go run c:\\gopath\\src\\github.com\\jantome\\" + programa + "\\" + programa + ".go"
+				comando = "go run c:\\gopath\\src\\github.com\\jantome\\" + programa + "\\" + programa + ".go -entorno=local"
 				consola = "cmd"
 				letra = "/C"
 			} else {
@@ -166,6 +166,23 @@ func rerun(programa string, fechaeje string) {
 						if err != nil {
 							log.Println("Error update condicionin")
 						}
+						//una vez finalizada la actualizacion de la condicion de salida, tenemos que volver a ejecutar
+						//ejecutajobs por si algo esta sin finalizar
+						if *entorno == "local" {
+							comando = "go run c:\\gopath\\src\\github.com\\jantome\\ejecutajob\\ejecutajob.go -entorno=local"
+							consola = "cmd"
+							letra = "/C"
+						} else {
+							comando = "cd /ejecutable/batch/app; ./ejecutajob "
+							consola = "bash"
+							letra = "-c"
+						}
+						//de esta manera no casca en caso de que falle el ejecutajob, y seguira ejecutandose el cumple horas
+						c := exec.Command(consola, letra, comando)
+						c.Stdin = os.Stdin
+						c.Stdout = os.Stdout
+						c.Stderr = os.Stderr
+						c.Run()
 					}
 				}
 			}
