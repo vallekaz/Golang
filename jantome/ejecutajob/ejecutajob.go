@@ -100,7 +100,7 @@ func ejecuta() {
 			}
 			//Ejecuta y saca la salida directamente teniendo en cuenta el entorno de ejecucion
 			if *entorno == "local" {
-				comando = "go run c:\\gopath\\src\\github.com\\jantome\\" + ejecucion.Nombre + "\\" + ejecucion.Nombre + ".go"
+				comando = "go run c:\\gopath\\src\\github.com\\jantome\\" + ejecucion.Nombre + "\\" + ejecucion.Nombre + ".go -entorno=local"
 				consola = "cmd"
 				letra = "/C"
 			} else {
