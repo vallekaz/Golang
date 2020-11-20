@@ -95,25 +95,26 @@ func main() {
 				//creamos variable de aplantillamento de la lectura
 				var ejecucion structs.Ejecucion
 				err = result.Scan(&ejecucion.Nombre)
-
 				if err != nil {
 					fmt.Println("Error lectura select horas", err.Error())
 					os.Exit(1)
 					return
 				}
+				//no podemos poner defer, ya que no salimos del bucle y no cierra. por lo que cerramos a mano
+				result.Close()
 				//una vez tenemos el nombre, realizamos una query para poner todos los estados a Ok, de la hora leida en el fichero
 				sql = fmt.Sprintf("UPDATE ejecucion SET estado ='ok' WHERE nombre = '%s' AND fechaeje ='%s'", ejecucion.Nombre, fechacm)
-				_, err = db2.EjecutaQuery(sql)
-
+				result, err = db2.EjecutaQuery(sql)
 				if err != nil {
 					fmt.Println("Error update estado", err.Error())
 					os.Exit(1)
 					return
 				}
+				//no podemos poner defer, ya que no salimos del bucle y no cierra. por lo que cerramos a mano
+				result.Close()
 				//Buscamos la condición de salida que tiene que dejar la hora leida en el fichero
 				sql = fmt.Sprintf("SELECT condicionout FROM ejecucion WHERE nombre ='%s' and condicionout > ''", ejecucion.Nombre)
 				result, err = db2.EjecutaQuery(sql)
-
 				if err != nil {
 					fmt.Println("Error select condicionout", err.Error())
 					os.Exit(1)
@@ -129,15 +130,18 @@ func main() {
 					os.Exit(1)
 					return
 				}
+				//no podemos poner defer, ya que no salimos del bucle y no cierra. por lo que cerramos a mano
+				result.Close()
 				//Actualizamos todas las lineas de la condicion de entrada que estan esperando los jobs (se actualiza con la condición de salida de la hora)
 				sql = fmt.Sprintf("UPDATE ejecucion SET estado ='ok' WHERE condicionin = '%s' AND fechaeje ='%s'", ejecucion2.Condicionout, fechacm)
-				_, err = db2.EjecutaQuery(sql)
-
+				result, err = db2.EjecutaQuery(sql)
 				if err != nil {
 					fmt.Println("Error update estado condicionin", err.Error())
 					os.Exit(1)
 					return
 				}
+				//no podemos poner defer, ya que no salimos del bucle y no cierra. por lo que cerramos a mano
+				result.Close()
 				//ejecutar ejecutajob, para que se lancen los job's con las condiciones de entradas cumplidas
 				//ademas lo hacemos de la manera que no para la ejecucion en caso de que falle
 				if *entorno == "local" {
