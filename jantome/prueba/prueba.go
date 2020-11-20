@@ -18,7 +18,9 @@ var (
 func main() {
 	flag.Parse()
 	//entorno := "local"
+	fmt.Println("inicio batch")
 	batch.Start("prueba", *entorno)
+	fmt.Println("fin inicio batc")
 	fmt.Println("Hola")
 	contador := 90
 	cabe := "\n******Estadisticas******"
