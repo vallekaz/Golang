@@ -9,7 +9,7 @@ type Tabejecucion struct {
 
 //Ejecucionjson json de salida con la información de la tabla de ejecución
 type Ejecucionjson struct {
-	Nombre   string `json:"nombre"`
+	Name     string `json:"name"`
 	Fechaeje string `json:"fechaEje"`
 	Estado   string `json:"estado"`
 	Links    struct {
