@@ -110,6 +110,7 @@ func rerun(programa string, fechaeje string) {
 			//poner el job que se pide hacer rerun como eje
 			sql := fmt.Sprintf("UPDATE ejecucion SET estado = 'ej' WHERE nombre = '%s' AND numsec = 1 AND fechaeje = '%s'", programa, fechaeje)
 			result, err := db2.EjecutaQuery(sql)
+			defer result.Close()
 			if err != nil {
 				log.Println("Update Ko error")
 			}
@@ -142,6 +143,7 @@ func rerun(programa string, fechaeje string) {
 				//em caso de que finalice OK actualizmaos
 				sql = fmt.Sprintf("UPDATE ejecucion SET estado= 'ok' WHERE nombre = '%s' AND fechaeje = '%s'", programa, fechaeje)
 				result, err = db2.EjecutaQuery(sql)
+				defer result.Close()
 				//controlamos error
 				if err != nil {
 					log.Println("Update OK error")
@@ -149,6 +151,7 @@ func rerun(programa string, fechaeje string) {
 					//Finaliza Ok el update y actualizamos las condiciones de salida
 					sql = fmt.Sprintf("SELECT condicionout FROM ejecucion WHERE nombre ='%s' AND condicionout > '' AND fechaeje = '%s' ", programa, fechaeje)
 					result, err := db2.EjecutaQuery(sql)
+					defer result.Close()
 					if err != nil {
 						log.Println("Error Select condicionout")
 					}
@@ -158,7 +161,8 @@ func rerun(programa string, fechaeje string) {
 						err = result.Scan(&ejecucion.Condicionout)
 						//realizmos update de la condicion de salida en toda la tabla
 						sql2 := fmt.Sprintf("UPDATE ejecucion SET estado='ok' WHERE condicionin = '%s' AND fechaeje = '%s'", ejecucion.Condicionout, fechaeje)
-						_, err = db2.EjecutaQuery(sql2)
+						result, err = db2.EjecutaQuery(sql2)
+						defer result.Close()
 						if err != nil {
 							log.Println("Error update condicionin")
 						}
@@ -185,12 +189,21 @@ func petic(programa string, fechaeje string) {
 			sql := fmt.Sprintf("INSERT INTO ejecucion VALUES('%s', 1, '%s', '','','pl')", programa, fechaeje)
 			log.Println(sql)
 			result, err := db2.EjecutaQuery(sql)
+			//Controlamos si result contiene datos antes de cerrarlo ya que si no falla y para la ejecuion
+			if result != nil {
+				defer result.Close()
+			}
+
 			if err != nil {
 				log.Println("Error Inser Petic", err.Error())
 			}
 			//para saber que es a petición cremos una condicion de peticion
 			sql = fmt.Sprintf("INSERT INTO ejecucion VALUES('%s', 2, '%s', 'petic-%s','','ok')", programa, fechaeje, programa)
 			result, err = db2.EjecutaQuery(sql)
+			//Controlamos si result contiene datos antes de cerrarlo ya que si no falla y para la ejecuion
+			if result != nil {
+				defer result.Close()
+			}
 			if err != nil {
 				log.Println("Error Inser Petci", err.Error())
 			} else {
@@ -213,9 +226,6 @@ func petic(programa string, fechaeje string) {
 				c.Stderr = os.Stderr
 				c.Run()
 			}
-			//como el proceso esta en continua ejecucion, no finaliza, y para no dejar en la BBDD conexiones abiertas,
-			//cerramos result
-			defer result.Close()
 		} else {
 			log.Println("nombre de programa no informado")
 		}
@@ -241,14 +251,14 @@ func main() {
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
-
+	queue, _ := os.LookupEnv("QUEUE")
 	q, err := ch.QueueDeclare(
-		"cmqueue", // name
-		true,      // durable
-		false,     // delete when unused
-		false,     // exclusive
-		false,     // no-wait
-		nil,       // arguments
+		queue, // name
+		true,  // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
@@ -287,6 +297,8 @@ func main() {
 			if err != nil {
 				log.Print("Error conversion json ", err)
 				log.Printf("Received a message: %s", d.Body)
+				//inicializamos variables ya que es un error en json
+				jsoncm.Accion = ""
 			}
 			//realizamos la acción que hemos recibido en el json
 			//holdear
