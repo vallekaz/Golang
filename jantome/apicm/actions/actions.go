@@ -1250,7 +1250,7 @@ func putPlanificacion(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-//postPlanificacion, inser en la tabla de planificacion con ejecucion = 'n' (sin condiciones)
+//postPlanificacion, insert en la tabla de planificacion con ejecucion = 'n' (sin condiciones)
 func postPlanificacion(response http.ResponseWriter, request *http.Request) {
 	//De entrada tendra un json en el que tendra como obligatorio el nombre, el calendario y el usuario de alta
 	//lo primero que hacemos es recuperar el json del body
@@ -1452,5 +1452,161 @@ func deletePlanificacion(response http.ResponseWriter, request *http.Request) {
 	} else {
 		//devolvemos 400 en caso de que no este informada el id
 		response.WriteHeader(http.StatusBadRequest)
+	}
+}
+
+//HandlerPlanifCondicionin para las condiciones de entrada en planificacion
+func HandlerPlanifCondicionin(response http.ResponseWriter, request *http.Request) {
+	//Methodos permitidos GET-OPTIONS
+	switch request.Method {
+	case "POST":
+		//ejecutamos la funcion para recuperar la info
+		postCondicionin(response, request)
+	//tenemos que habilitar el metodo options, para que se puedan verificar los cors
+	case "OPTIONS":
+		options2(response, request)
+	default:
+		jsonerror.UserMessage = fmt.Sprintf("Not implemented Method %s", request.Method)
+		//Montamos el json de error
+		JsResponser, err := json.Marshal(jsonerror)
+		//Controlar el error y devolver un 500
+		if err != nil {
+			//Informamos el json
+			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+			jsonerror.InternalMessage = fmt.Sprintf("Error json1. Descripción: %s", err.Error())
+			JsResponser, err := json.Marshal(jsonerror)
+			//si vuelve a fallar la generacion, ya grabamos en log
+			if err != nil {
+				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+				return
+			}
+			//Creamos cabecera
+			response.Header().Set("Content-Type", "application/json")
+			//movemos 500 al error
+			response.WriteHeader(http.StatusInternalServerError)
+			//grabamos el json de error
+			response.Write(JsResponser)
+			return
+		}
+		//para que funcione correctamente el orden tiene que ser este. Grabar cabecera, escribir cabecera, escribir cuerpo(json)
+		//creamos cabecera de respuesta
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 405 al error
+		response.WriteHeader(http.StatusMethodNotAllowed)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+}
+
+//postCondicionin para insertar las condiciones de entrada en la planificacion
+func postCondicionin(response http.ResponseWriter, request *http.Request) {
+	//De entrada tendra un json en el que tendra como obligatorio el nombre, el calendario y el usuario de alta
+	//lo primero que hacemos es recuperar el json del body
+	cuerpo := json.NewDecoder(request.Body)
+	//ceramos la respuesta de body con defer para que se ejecute al final
+	defer request.Body.Close()
+	//creamos variable donde aplantillaremos
+	var postcondicionin structs.Postcondicionin
+	//decodificamos en el struc correspondiente
+	err := cuerpo.Decode(&postcondicionin)
+	//controlamos el error
+	if err != nil {
+		//json de error
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+		jsonerror.InternalMessage = fmt.Sprintf("Error decode postcondicionin. Descripción: %s", err.Error())
+		JsResponser, err := json.Marshal(jsonerror)
+		//si falla la generacion damos error grave
+		if err != nil {
+			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			return
+		}
+		//Creamos cabecera
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 500 al error
+		response.WriteHeader(http.StatusInternalServerError)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+	//comprobamos que los datos de entrada estan informados
+	if postcondicionin.Name != "" {
+		if postcondicionin.Condicionin != "" {
+			if postcondicionin.Useralt != "" {
+				//si todos los datos estan informados primero recuperamos el calendario del programa principal
+				sql := fmt.Sprintf("SELECT calendario FROM planificacion WHERE nombre = '%s' AND ejecucion = 'n'", postcondicionin.Name)
+				fmt.Println(sql)
+				result, err := db2.EjecutaQuery(sql)
+				//controlamos error
+				if err != nil {
+					//json de error
+					jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+					jsonerror.InternalMessage = fmt.Sprintf("Error select calendario planificacion. Descripción: %s", err.Error())
+					JsResponser, err := json.Marshal(jsonerror)
+					//si falla la generacion damos error grave
+					if err != nil {
+						http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+						return
+					}
+					//Creamos cabecera
+					response.Header().Set("Content-Type", "application/json")
+					//movemos 500 al error
+					response.WriteHeader(http.StatusInternalServerError)
+					//grabamos el json de error
+					response.Write(JsResponser)
+					return
+				}
+				//solo tendra un registro, por lo que no tenemos que montar bucle
+				var calendarplanificacion structs.Calendarplanificacion
+				result.Next()
+				defer result.Close()
+				//aplantillamos
+				err = result.Scan(&calendarplanificacion.Calendario)
+				if err != nil {
+					//json de error
+					jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+					jsonerror.InternalMessage = fmt.Sprintf("Error scan calendarplanificacion. Descripción: %s", err.Error())
+					JsResponser, err := json.Marshal(jsonerror)
+					//si falla la generacion damos error grave
+					if err != nil {
+						http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+						return
+					}
+					//Creamos cabecera
+					response.Header().Set("Content-Type", "application/json")
+					//movemos 500 al error
+					response.WriteHeader(http.StatusInternalServerError)
+					//grabamos el json de error
+					response.Write(JsResponser)
+					return
+				}
+				//cerramos result
+				defer result.Close()
+				//realizamos insert
+				sql = fmt.Sprintf("INSERT INTO planificacion VALUES( NULL, '%s','', '%s','','%s','%s',CURRENT_TIMESTAMP,'%s',CURRENT_TIMESTAMP)", postcondicionin.Name, postcondicionin.Condicionin, calendarplanificacion.Calendario, postcondicionin.Useralt, postcondicionin.Useralt)
+				//ejecutamos la query
+				result, err = db2.EjecutaQuery(sql)
+				fmt.Println(sql)
+				if err != nil {
+					//json de error
+					jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+					jsonerror.InternalMessage = fmt.Sprintf("Error insert condicionin planificacion. Descripción: %s", err.Error())
+					JsResponser, err := json.Marshal(jsonerror)
+					//si falla la generacion damos error grave
+					if err != nil {
+						http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+						return
+					}
+					//Creamos cabecera
+					response.Header().Set("Content-Type", "application/json")
+					//movemos 500 al error
+					response.WriteHeader(http.StatusInternalServerError)
+					//grabamos el json de error
+					response.Write(JsResponser)
+					return
+				}
+				defer result.Close()
+			}
+		}
 	}
 }
