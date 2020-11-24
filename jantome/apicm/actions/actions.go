@@ -1453,5 +1453,4 @@ func deletePlanificacion(response http.ResponseWriter, request *http.Request) {
 		//devolvemos 400 en caso de que no este informada el id
 		response.WriteHeader(http.StatusBadRequest)
 	}
-
 }
