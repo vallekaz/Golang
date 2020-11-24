@@ -35,6 +35,11 @@ type Ejecucioncount struct {
 	Count int64
 }
 
+//Estadoejecucion lectura del estado de la tabla de ejecucion
+type Estadoejecucion struct {
+	Estado string
+}
+
 //Jsonerror estructura del json de error
 type Jsonerror struct {
 	UserMessage     string `json:"userMessage"`

@@ -25,6 +25,9 @@ func HandlerEjecucion(response http.ResponseWriter, request *http.Request) {
 	case "GET":
 		//ejecutamos la funcion para validar/usuario y pass y generar token en caso de que sea correcto
 		getEjecucion(response, request)
+	case "DELETE":
+		//para la eliminacion de la tabla de ejecucion
+		deleteEjecucion(response, request)
 	//tenemos que habilitar el metodo options, para que se puedan verificar los cors
 	case "OPTIONS":
 		options1(response, request)
@@ -306,6 +309,118 @@ func getEjecucion(response http.ResponseWriter, request *http.Request) {
 			//grabamos cuerpo
 			response.Write(JsResponser)
 		}
+	}
+}
+
+//deleteEjecucion, para eliminar si esta Ko por ejemplo, pero tiene que pasar por hold primero
+func deleteEjecucion(response http.ResponseWriter, request *http.Request) {
+	//variables inicializadas
+	fechaeje2 := ""
+	//Optenemos la Id de la urle
+	urlpath := request.URL.Path
+	id := path.Base(urlpath)
+	//Recuperamos el parametro de fecha que llegara en la url
+	fechaeje, ok := request.URL.Query()["fechaeje"]
+	//comprobamos que extrae datos de la variable page
+	if ok && len(fechaeje[0]) > 0 {
+		//nos quedamos con la primera ocurrencia por si existiese alguna más
+		fechaeje2 = fechaeje[0]
+	} else {
+		//json de error
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+		jsonerror.InternalMessage = fmt.Sprintf("Invalid Parameter url: fechaeje")
+		JsResponser, err := json.Marshal(jsonerror)
+		//si falla la generacion damos error grave
+		if err != nil {
+			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			return
+		}
+		//Creamos cabecera
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 500 al error
+		response.WriteHeader(http.StatusInternalServerError)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+	//comprobamos el estado ya que tiene que estar holdeado para poder elimintar
+	sql := fmt.Sprintf("SELECT estado FROM ejecucion WHERE nombre = '%s' AND fechaeje ='%s' AND NUMSEC = 1", id, fechaeje2)
+	//ejecutamos Query
+	result, err := db2.EjecutaQuery(sql)
+	fmt.Println(sql)
+	//Controlar el error para devolver un 500
+	if err != nil {
+		//json de error
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+		jsonerror.InternalMessage = fmt.Sprintf("Error select estado. Descripción: %s", err.Error())
+		JsResponser, err := json.Marshal(jsonerror)
+		//si falla la generacion damos error grave
+		if err != nil {
+			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			return
+		}
+		//Creamos cabecera
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 500 al error
+		response.WriteHeader(http.StatusInternalServerError)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+	//solo tendra un registro por lo que no se monta bucle
+	result.Next()
+	//creamos variable donde aplantillar
+	var estadoejecucion structs.Estadoejecucion
+	err = result.Scan(&estadoejecucion.Estado)
+	//cerramos result
+	defer result.Close()
+	//controlamos el error
+	if err != nil {
+		//json de error
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+		jsonerror.InternalMessage = fmt.Sprintf("Error scan estado. Descripción: %s", err.Error())
+		JsResponser, err := json.Marshal(jsonerror)
+		//si falla la generacion damos error grave
+		if err != nil {
+			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			return
+		}
+		//Creamos cabecera
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 500 al error
+		response.WriteHeader(http.StatusInternalServerError)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+	//Controlamos el estado y si es holdeado realizamos el delete
+	if estadoejecucion.Estado == "ho" {
+		sql := fmt.Sprintf("DELETE FROM ejecucion WHERE nombre = '%s' AND fechaeje ='%s'", id, fechaeje2)
+		result, err := db2.EjecutaQuery(sql)
+		defer result.Close()
+		//Controlar el error para devolver un 500
+		if err != nil {
+			//json de error
+			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+			jsonerror.InternalMessage = fmt.Sprintf("Error delete ejecucion. Descripción: %s", err.Error())
+			JsResponser, err := json.Marshal(jsonerror)
+			//si falla la generacion damos error grave
+			if err != nil {
+				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+				return
+			}
+			//Creamos cabecera
+			response.Header().Set("Content-Type", "application/json")
+			//movemos 500 al error
+			response.WriteHeader(http.StatusInternalServerError)
+			//grabamos el json de error
+			response.Write(JsResponser)
+			return
+		}
+	} else {
+		//movemos 404 de no encontrado
+		response.WriteHeader(http.StatusNotFound)
+		return
 	}
 }
 
