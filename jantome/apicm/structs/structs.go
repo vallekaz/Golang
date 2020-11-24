@@ -99,3 +99,15 @@ type Postplanificacion struct {
 	Calendar string `json:"calendar"`
 	Useralt  string `json:"useralt"`
 }
+
+//Postcondicionin alta en la tabla de planificacion de las condiciones de entrada
+type Postcondicionin struct {
+	Name        string `json:"name"`
+	Condicionin string `json:"condicionin"`
+	Useralt     string `json:"useralt"`
+}
+
+//Calendarplanificacion para recuperar el calendario de la tabla de planificacion
+type Calendarplanificacion struct {
+	Calendario string
+}
