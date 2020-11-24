@@ -4,13 +4,13 @@ import (
 	//Librería para las variables de entorno
 	"os"
 	//libreria variables de entorno
-	"github.com/jantome/apicm/environment"
+	"github.com/jantome/apicm2/environment"
 	//Libería de Log's
 	"log"
 	//Librería para HTTP
 	"net/http"
 	//Librería para las rutas
-	"github.com/jantome/apicm/routes"
+	"github.com/jantome/apicm2/routes"
 )
 
 //función principal

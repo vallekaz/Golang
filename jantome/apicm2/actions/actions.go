@@ -4,17 +4,17 @@ import (
 	//Librería de log
 	"log"
 	//Librería para fichero de log
-	"github.com/jantome/apicm/logs"
+	"github.com/jantome/apicm2/logs"
 	//Librería de sistema
 	"os"
 	//Librería para las variables de entorno
-	"github.com/jantome/apicm/environment"
+	"github.com/jantome/apicm2/environment"
 	//Librería con las opciones de db2
-	"github.com/jantome/apicm/db2"
+	"github.com/jantome/apicm2/db2"
 	//Libreria FMT para el formateo de la query
 	"fmt"
 	//Libería de structs
-	"github.com/jantome/apicm/structs"
+	"github.com/jantome/apicm2/structs"
 	//Librería para json
 	"encoding/json"
 	//Librería para http

@@ -4,7 +4,7 @@ import (
 	//librería de http
 	"net/http"
 	//libreria con las acciones que realizara
-	"github.com/jantome/apicm/actions"
+	"github.com/jantome/apicm2/actions"
 )
 
 //Routes funcion para arrancar el servidor
