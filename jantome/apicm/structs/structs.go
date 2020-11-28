@@ -111,3 +111,8 @@ type Postcondicionin struct {
 type Calendarplanificacion struct {
 	Calendario string
 }
+
+//Calendar struct de la tabla y para sacar el json con el listado de calendarios
+type Calendar struct {
+	Name string `json:"name"`
+}
