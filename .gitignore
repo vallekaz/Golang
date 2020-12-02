@@ -1,7 +1,6 @@
-
 jantome/apilogin/logs.txt
 jantome/*/horas*
 jantome/*/*.env
 jantome/*/*D*H*
 log
-batcharq/batch/*.env
+batcharq
