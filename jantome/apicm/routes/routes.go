@@ -20,11 +20,15 @@ func Routes() {
 	http.HandleFunc("/cm/v1/planificacion", actions.HandlerPlanificacion)
 	//Endpoint para la tabla de planificacion con / para el delete ya que recibira el ID en la ULR de esa manera
 	http.HandleFunc("/cm/v1/planificacion/", actions.HandlerPlanificacion)
-	//Endpoint para el el resto de metodos para las condiciones de entrada de planificacion (los que no tienen por url /datao)
+	//Endpoint para el el resto de metodos para las condiciones de entrada de planificacion (los que no tienen por url /(dato))
 	http.HandleFunc("/cm/v1/planificacion/condicionin", actions.HandlerPlanifCondicionin)
 	//Endpoint para el get para las condiciones de entrada de planificacion
 	http.HandleFunc("/cm/v1/planificacion/condicionin/", actions.HandlerPlanifCondicionin)
 	//Endpoint para recuperar los calendarios
 	http.HandleFunc("/cm/v1/calendar", actions.HandlerCalendar)
+	//Endpoint para el el resto de metodos para las condiciones de salida de planificacion (los que no tienen por url /(dato))
+	http.HandleFunc("/cm/v1/planificacion/condicionout", actions.HandlerPlanifCondicionout)
+	//Endpoint para el get para las condiciones de salida de planificacion
+	http.HandleFunc("/cm/v1/planificacion/condicionout/", actions.HandlerPlanifCondicionout)
 
 }
