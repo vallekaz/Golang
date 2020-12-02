@@ -4,4 +4,5 @@ jantome/*/*.env
 jantome/*/*D*H*
 log
 batcharq/batch/batcharq.env
+batcharq\batch\batcharq.env
 *.env
