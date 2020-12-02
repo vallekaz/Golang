@@ -116,3 +116,10 @@ type Calendarplanificacion struct {
 type Calendar struct {
 	Name string `json:"name"`
 }
+
+//Postcondicionout alta en la tabla de planificacion de las condiciones de entrada
+type Postcondicionout struct {
+	Name         string `json:"name"`
+	Condicionout string `json:"condicionout"`
+	Useralt      string `json:"useralt"`
+}
