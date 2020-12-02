@@ -348,7 +348,6 @@ func deleteEjecucion(response http.ResponseWriter, request *http.Request) {
 	sql := fmt.Sprintf("SELECT estado FROM ejecucion WHERE nombre = '%s' AND fechaeje ='%s' AND NUMSEC = 1", id, fechaeje2)
 	//ejecutamos Query
 	result, err := db2.EjecutaQuery(sql)
-	fmt.Println(sql)
 	//Controlar el error para devolver un 500
 	if err != nil {
 		//json de error
@@ -441,7 +440,7 @@ func options1(response http.ResponseWriter, request *http.Request) {
 	return
 }
 
-//HandlerCondicionin condiciones de entrada
+//HandlerCondicionin condiciones de entrada de la tabla ejecucion
 func HandlerCondicionin(response http.ResponseWriter, request *http.Request) {
 	//Methodos permitidos GET-OPTIONS
 	switch request.Method {
@@ -485,7 +484,7 @@ func HandlerCondicionin(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-//getCondicionnin condiciones de entrada en json
+//getCondicionnin condiciones de entrada en json de la tabla ejecucion
 func getCondicionin(response http.ResponseWriter, request *http.Request) {
 	//Creamos la variable necesaria
 	fechaeje2 := ""
@@ -1229,7 +1228,6 @@ func putPlanificacion(response http.ResponseWriter, request *http.Request) {
 	if planificacioncount.Count > 0 {
 		//Una vez validado los datos obligatorios montamos la query
 		sql = fmt.Sprintf("UPDATE planificacion SET calendario = '%s', user_modif = '%s' WHERE nombre = '%s'", putplanificacion.Calendar, putplanificacion.Usermod, putplanificacion.Name)
-		fmt.Println(sql)
 		//ejecutamos la query
 		result, err := db2.EjecutaQuery(sql)
 		//este defer de resultado, es para los put, ya que si no se queda la conexión abierta con mysql
@@ -1475,6 +1473,8 @@ func HandlerPlanifCondicionin(response http.ResponseWriter, request *http.Reques
 	case "POST":
 		//ejecutamos la funcion para recuperar la info
 		postCondicionin(response, request)
+	case "DELETE":
+		delCondicionin(response, request)
 	//tenemos que habilitar el metodo options, para que se puedan verificar los cors
 	case "OPTIONS":
 		options2(response, request)
@@ -1640,7 +1640,6 @@ func postCondicionin(response http.ResponseWriter, request *http.Request) {
 			if postcondicionin.Useralt != "" {
 				//si todos los datos estan informados primero recuperamos el calendario del programa principal
 				sql := fmt.Sprintf("SELECT calendario FROM planificacion WHERE nombre = '%s' AND ejecucion = 'n'", postcondicionin.Name)
-				fmt.Println(sql)
 				result, err := db2.EjecutaQuery(sql)
 				//controlamos error
 				if err != nil {
@@ -1693,7 +1692,6 @@ func postCondicionin(response http.ResponseWriter, request *http.Request) {
 					sql = fmt.Sprintf("INSERT INTO planificacion VALUES( NULL, '%s','', '%s','','%s','%s',CURRENT_TIMESTAMP,'%s',CURRENT_TIMESTAMP)", postcondicionin.Name, postcondicionin.Condicionin, calendarplanificacion.Calendario, postcondicionin.Useralt, postcondicionin.Useralt)
 					//ejecutamos la query
 					result, err = db2.EjecutaQuery(sql)
-					fmt.Println(sql)
 					if err != nil {
 						//json de error
 						jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
@@ -1712,6 +1710,8 @@ func postCondicionin(response http.ResponseWriter, request *http.Request) {
 						response.Write(JsResponser)
 						return
 					}
+					//mostramos el mensaje de creado
+					response.WriteHeader(http.StatusCreated)
 					defer result.Close()
 				}
 				if !datos {
@@ -1730,6 +1730,98 @@ func postCondicionin(response http.ResponseWriter, request *http.Request) {
 	} else {
 		response.WriteHeader(http.StatusBadRequest)
 		return
+	}
+}
+
+//delCondicionin para la elmiminación de la condicion de entrada de la tabla planificación
+func delCondicionin(response http.ResponseWriter, request *http.Request) {
+	condicion2 := ""
+	//recuperamos el id(name) de la url
+	urlpath := request.URL.Path
+	id := path.Base(urlpath)
+	//obtenemos las variables de la url (condición)
+	condicion, ok := request.URL.Query()["condicion"]
+	//comprobamos que extrae datos de la variable page
+	if ok && len(condicion[0]) > 0 {
+		//nos quedamos con la primera ocurrencia por si existiese alguna más
+		condicion2 = condicion[0]
+	}
+	//con el name recuperado y la condicion a borrar, montamos la query, lo primero que hacemos es comprobar que
+	//existe
+	sql := fmt.Sprintf("SELECT COUNT(*) FROM planificacion WHERE nombre = '%s' AND condicionin = '%s'", id, condicion2)
+	result, err := db2.EjecutaQuery(sql)
+	if err != nil {
+		//json de error
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+		jsonerror.InternalMessage = fmt.Sprintf("Error select count planificacion. Descripción: %s", err.Error())
+		JsResponser, err := json.Marshal(jsonerror)
+		//si falla la generacion damos error grave
+		if err != nil {
+			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			return
+		}
+		//Creamos cabecera
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 500 al error
+		response.WriteHeader(http.StatusInternalServerError)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+	//creamos variable donde leermos
+	var planificacioncount structs.Planificacioncount
+	//solo tendremos una ocurrencia
+	result.Next()
+	defer result.Close()
+	//aplantillamos
+	err = result.Scan(&planificacioncount.Count)
+	//Controlar el error para devolver un 500
+	if err != nil {
+		//json de error
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+		jsonerror.InternalMessage = fmt.Sprintf("Error scan count. Descripción: %s", err.Error())
+		JsResponser, err := json.Marshal(jsonerror)
+		//si falla la generacion damos error grave
+		if err != nil {
+			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			return
+		}
+		//Creamos cabecera
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 500 al error
+		response.WriteHeader(http.StatusInternalServerError)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+	//Solo hacemos delete si el count es > 0
+	if planificacioncount.Count > 0 {
+		sql = fmt.Sprintf("DELETE FROM planificacion WHERE nombre = '%s' AND condicionin = '%s'", id, condicion2)
+		result, err = db2.EjecutaQuery(sql)
+		//este defer de resultado, es igual que en los put para que cierre la conexión con mysql
+		defer result.Close()
+		//Controlar el error para devolver un 500
+		if err != nil {
+			//json de error
+			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+			jsonerror.InternalMessage = fmt.Sprintf("Error delete planificacion condicionin. Descripción: %s", err.Error())
+			JsResponser, err := json.Marshal(jsonerror)
+			//si falla la generacion damos error grave
+			if err != nil {
+				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+				return
+			}
+			//Creamos cabecera
+			response.Header().Set("Content-Type", "application/json")
+			//movemos 500 al error
+			response.WriteHeader(http.StatusInternalServerError)
+			//grabamos el json de error
+			response.Write(JsResponser)
+			return
+		}
+	} else {
+		//en caso de no existir lo que hacemos es mostrar un 404
+		response.WriteHeader(http.StatusNotFound)
 	}
 }
 
@@ -1865,5 +1957,367 @@ func getCalendar(response http.ResponseWriter, request *http.Request) {
 		response.Header().Set("Content-Type", "application/json")
 		//grabamos cuerpo
 		response.Write(JsResponser)
+	}
+}
+
+//HandlerPlanifCondicionout para las condiciones de entrada en planificacion
+func HandlerPlanifCondicionout(response http.ResponseWriter, request *http.Request) {
+	//Methodos permitidos GET-OPTIONS
+	switch request.Method {
+	//para recuperar las condiciones de entrada de la tabla planif
+	case "GET":
+		getcondicionout2(response, request)
+	case "POST":
+		//ejecutamos la funcion para recuperar la info
+		postCondicionout(response, request)
+	case "DELETE":
+		delCondicionout(response, request)
+	//tenemos que habilitar el metodo options, para que se puedan verificar los cors
+	case "OPTIONS":
+		options2(response, request)
+	default:
+		jsonerror.UserMessage = fmt.Sprintf("Not implemented Method %s", request.Method)
+		//Montamos el json de error
+		JsResponser, err := json.Marshal(jsonerror)
+		//Controlar el error y devolver un 500
+		if err != nil {
+			//Informamos el json
+			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+			jsonerror.InternalMessage = fmt.Sprintf("Error json1. Descripción: %s", err.Error())
+			JsResponser, err := json.Marshal(jsonerror)
+			//si vuelve a fallar la generacion, ya grabamos en log
+			if err != nil {
+				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+				return
+			}
+			//Creamos cabecera
+			response.Header().Set("Content-Type", "application/json")
+			//movemos 500 al error
+			response.WriteHeader(http.StatusInternalServerError)
+			//grabamos el json de error
+			response.Write(JsResponser)
+			return
+		}
+		//para que funcione correctamente el orden tiene que ser este. Grabar cabecera, escribir cabecera, escribir cuerpo(json)
+		//creamos cabecera de respuesta
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 405 al error
+		response.WriteHeader(http.StatusMethodNotAllowed)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+}
+
+//getcondicionout2 para sacar las condiciones de la tabla de planificacion
+func getcondicionout2(response http.ResponseWriter, request *http.Request) {
+	//recuperamos el id de la url
+	urlpath := request.URL.Path
+	id := path.Base(urlpath)
+	//Query para recuperar todas las condiciones de entrada
+	sql := fmt.Sprintf("SELECT condicionout FROM planificacion WHERE nombre ='%s' AND condicionout > '' ", id)
+	result, err := db2.EjecutaQuery(sql)
+	//Controlar el error para devolver un 500
+	if err != nil {
+		//json de error
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+		jsonerror.InternalMessage = fmt.Sprintf("Error select condicionin. Descripción: %s", err.Error())
+		JsResponser, err := json.Marshal(jsonerror)
+		//si falla la generacion damos error grave
+		if err != nil {
+			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			return
+		}
+		//Creamos cabecera
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 500 al error
+		response.WriteHeader(http.StatusInternalServerError)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+	//creamos bucle para sacar las condiciones
+	// Variable de lectura
+	var condicionout structs.Condicionout
+	//Variable para la acumulacion del json de salida
+	jsoncondicionout := []structs.Condicionout{}
+	//Sw para saber si sacamos datos o no
+	sidatos := false
+	for result.Next() {
+		sidatos = true
+		//aplantillamos en el struct de salida
+		err = result.Scan(&condicionout.Condicionout)
+		//Controlar el error y devolver un 500
+		if err != nil {
+			//json de error
+			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+			jsonerror.InternalMessage = fmt.Sprintf("Error scan condicion. Descripción: %s", err.Error())
+			JsResponser, err := json.Marshal(jsonerror)
+			//si falla la generacion damos error grave
+			if err != nil {
+				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+				return
+			}
+			//Creamos cabecera
+			response.Header().Set("Content-Type", "application/json")
+			//movemos 500 al error
+			response.WriteHeader(http.StatusInternalServerError)
+			//grabamos el json de error
+			response.Write(JsResponser)
+			return
+		}
+		//Acumulamos en el json
+		jsoncondicionout = append(jsoncondicionout, condicionout)
+	}
+	//al salir del for es cuando creamos el json siempre y cuando tengamos algo en la lectura
+	if sidatos {
+		JsResponser, err := json.Marshal(jsoncondicionout)
+		if err != nil {
+			//Informamos el json
+			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+			jsonerror.InternalMessage = fmt.Sprintf("Error json2. Descripción: %s", err.Error())
+			JsResponser, err := json.Marshal(jsonerror)
+			//si vuelve a fallar la generacion, ya grabamos en log
+			if err != nil {
+				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+				return
+			}
+			//Creamos cabecera
+			response.Header().Set("Content-Type", "application/json")
+			//movemos 500 al error
+			response.WriteHeader(http.StatusInternalServerError)
+			//grabamos el json de error
+			response.Write(JsResponser)
+			return
+		}
+		response.Header().Set("Content-Type", "application/json")
+		response.Write(JsResponser)
+	}
+	//Si no tenemos datos sacamos 204
+	if !sidatos {
+		//movemos 204 al error
+		response.WriteHeader(http.StatusNoContent)
+		return
+	}
+}
+
+//postCondicionout para insertar las condiciones de entrada en la planificacion
+func postCondicionout(response http.ResponseWriter, request *http.Request) {
+	//De entrada tendra un json en el que tendra como obligatorio el nombre, el calendario y el usuario de alta
+	//lo primero que hacemos es recuperar el json del body
+	cuerpo := json.NewDecoder(request.Body)
+	//ceramos la respuesta de body con defer para que se ejecute al final
+	defer request.Body.Close()
+	//creamos variable donde aplantillaremos
+	var postcondicionout structs.Postcondicionout
+	//decodificamos en el struc correspondiente
+	err := cuerpo.Decode(&postcondicionout)
+	//controlamos el error
+	if err != nil {
+		//json de error
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+		jsonerror.InternalMessage = fmt.Sprintf("Error decode postcondicionout. Descripción: %s", err.Error())
+		JsResponser, err := json.Marshal(jsonerror)
+		//si falla la generacion damos error grave
+		if err != nil {
+			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			return
+		}
+		//Creamos cabecera
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 500 al error
+		response.WriteHeader(http.StatusInternalServerError)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+	//comprobamos que los datos de entrada estan informados
+	if postcondicionout.Name != "" {
+		if postcondicionout.Condicionout != "" {
+			if postcondicionout.Useralt != "" {
+				//si todos los datos estan informados primero recuperamos el calendario del programa principal
+				sql := fmt.Sprintf("SELECT calendario FROM planificacion WHERE nombre = '%s' AND ejecucion = 'n'", postcondicionout.Name)
+				result, err := db2.EjecutaQuery(sql)
+				//controlamos error
+				if err != nil {
+					//json de error
+					jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+					jsonerror.InternalMessage = fmt.Sprintf("Error select calendario planificacion. Descripción: %s", err.Error())
+					JsResponser, err := json.Marshal(jsonerror)
+					//si falla la generacion damos error grave
+					if err != nil {
+						http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+						return
+					}
+					//Creamos cabecera
+					response.Header().Set("Content-Type", "application/json")
+					//movemos 500 al error
+					response.WriteHeader(http.StatusInternalServerError)
+					//grabamos el json de error
+					response.Write(JsResponser)
+					return
+				}
+				//solo tendra un registro, pero tenemos que montar bucle igual para que no falle
+				var calendarplanificacion structs.Calendarplanificacion
+				datos := false
+				for result.Next() {
+					datos = true
+					//aplantillamos
+					err = result.Scan(&calendarplanificacion.Calendario)
+					defer result.Close()
+					if err != nil {
+						//json de error
+						jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+						jsonerror.InternalMessage = fmt.Sprintf("Error scan calendarplanificacion. Descripción: %s", err.Error())
+						JsResponser, err := json.Marshal(jsonerror)
+						//si falla la generacion damos error grave
+						if err != nil {
+							http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+							return
+						}
+						//Creamos cabecera
+						response.Header().Set("Content-Type", "application/json")
+						//movemos 500 al error
+						response.WriteHeader(http.StatusInternalServerError)
+						//grabamos el json de error
+						response.Write(JsResponser)
+						return
+					}
+					//cerramos result
+					defer result.Close()
+					//realizamos insert
+					sql = fmt.Sprintf("INSERT INTO planificacion VALUES( NULL, '%s','', '','%s','%s','%s',CURRENT_TIMESTAMP,'%s',CURRENT_TIMESTAMP)", postcondicionout.Name, postcondicionout.Condicionout, calendarplanificacion.Calendario, postcondicionout.Useralt, postcondicionout.Useralt)
+					//ejecutamos la query
+					result, err = db2.EjecutaQuery(sql)
+					if err != nil {
+						//json de error
+						jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+						jsonerror.InternalMessage = fmt.Sprintf("Error insert condicionin planificacion. Descripción: %s", err.Error())
+						JsResponser, err := json.Marshal(jsonerror)
+						//si falla la generacion damos error grave
+						if err != nil {
+							http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+							return
+						}
+						//Creamos cabecera
+						response.Header().Set("Content-Type", "application/json")
+						//movemos 500 al error
+						response.WriteHeader(http.StatusInternalServerError)
+						//grabamos el json de error
+						response.Write(JsResponser)
+						return
+					}
+					//mostramos el mensaje de creado
+					response.WriteHeader(http.StatusCreated)
+					defer result.Close()
+				}
+				if !datos {
+					//movemos 204 al error
+					response.WriteHeader(http.StatusNotFound)
+					return
+				}
+			} else {
+				response.WriteHeader(http.StatusBadRequest)
+				return
+			}
+		} else {
+			response.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	} else {
+		response.WriteHeader(http.StatusBadRequest)
+		return
+	}
+}
+
+//delCondicionout para la elmiminación de la condicion de entrada de la tabla planificación
+func delCondicionout(response http.ResponseWriter, request *http.Request) {
+	condicion2 := ""
+	//recuperamos el id(name) de la url
+	urlpath := request.URL.Path
+	id := path.Base(urlpath)
+	//obtenemos las variables de la url (condición)
+	condicion, ok := request.URL.Query()["condicion"]
+	//comprobamos que extrae datos de la variable page
+	if ok && len(condicion[0]) > 0 {
+		//nos quedamos con la primera ocurrencia por si existiese alguna más
+		condicion2 = condicion[0]
+	}
+	//con el name recuperado y la condicion a borrar, montamos la query, lo primero que hacemos es comprobar que
+	//existe
+	sql := fmt.Sprintf("SELECT COUNT(*) FROM planificacion WHERE nombre = '%s' AND condicionout = '%s'", id, condicion2)
+	result, err := db2.EjecutaQuery(sql)
+	if err != nil {
+		//json de error
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+		jsonerror.InternalMessage = fmt.Sprintf("Error select count planificacion. Descripción: %s", err.Error())
+		JsResponser, err := json.Marshal(jsonerror)
+		//si falla la generacion damos error grave
+		if err != nil {
+			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			return
+		}
+		//Creamos cabecera
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 500 al error
+		response.WriteHeader(http.StatusInternalServerError)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+	//creamos variable donde leermos
+	var planificacioncount structs.Planificacioncount
+	//solo tendremos una ocurrencia
+	result.Next()
+	defer result.Close()
+	//aplantillamos
+	err = result.Scan(&planificacioncount.Count)
+	//Controlar el error para devolver un 500
+	if err != nil {
+		//json de error
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+		jsonerror.InternalMessage = fmt.Sprintf("Error scan count. Descripción: %s", err.Error())
+		JsResponser, err := json.Marshal(jsonerror)
+		//si falla la generacion damos error grave
+		if err != nil {
+			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			return
+		}
+		//Creamos cabecera
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 500 al error
+		response.WriteHeader(http.StatusInternalServerError)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+	//Solo hacemos delete si el count es > 0
+	if planificacioncount.Count > 0 {
+		sql = fmt.Sprintf("DELETE FROM planificacion WHERE nombre = '%s' AND condicionout = '%s'", id, condicion2)
+		result, err = db2.EjecutaQuery(sql)
+		//este defer de resultado, es igual que en los put para que cierre la conexión con mysql
+		defer result.Close()
+		//Controlar el error para devolver un 500
+		if err != nil {
+			//json de error
+			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+			jsonerror.InternalMessage = fmt.Sprintf("Error delete planificacion condicionin. Descripción: %s", err.Error())
+			JsResponser, err := json.Marshal(jsonerror)
+			//si falla la generacion damos error grave
+			if err != nil {
+				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+				return
+			}
+			//Creamos cabecera
+			response.Header().Set("Content-Type", "application/json")
+			//movemos 500 al error
+			response.WriteHeader(http.StatusInternalServerError)
+			//grabamos el json de error
+			response.Write(JsResponser)
+			return
+		}
+	} else {
+		//en caso de no existir lo que hacemos es mostrar un 404
+		response.WriteHeader(http.StatusNotFound)
 	}
 }
