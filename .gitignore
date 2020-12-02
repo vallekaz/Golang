@@ -3,4 +3,4 @@ jantome/*/horas*
 jantome/*/*.env
 jantome/*/*D*H*
 log
-batcharq
+batcharq/batch/batcharq.env
