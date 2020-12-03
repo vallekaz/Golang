@@ -18,7 +18,7 @@ func Routes() {
 	http.HandleFunc("/cm/v1/ejecuciones/condicionout/", actions.HandlerCondicionout)
 	//Endpoint para la tabla de planificacion
 	http.HandleFunc("/cm/v1/planificacion", actions.HandlerPlanificacion)
-	//Endpoint para la tabla de planificacion con / para el delete ya que recibira el ID en la ULR de esa manera
+	//Endpoint para la tabla de planificacion con / para el delete ya que recibira el ID en la URL de esa manera
 	http.HandleFunc("/cm/v1/planificacion/", actions.HandlerPlanificacion)
 	//Endpoint para el el resto de metodos para las condiciones de entrada de planificacion (los que no tienen por url /(dato))
 	http.HandleFunc("/cm/v1/planificacion/condicionin", actions.HandlerPlanifCondicionin)
