@@ -3,8 +3,10 @@ package actions
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"net/http"
+	"os"
 	"path"
 	"strconv"
 	"time"
@@ -2320,4 +2322,83 @@ func delCondicionout(response http.ResponseWriter, request *http.Request) {
 		//en caso de no existir lo que hacemos es mostrar un 404
 		response.WriteHeader(http.StatusNotFound)
 	}
+}
+
+//HandlerLog donde devolver la salida de la ejecucion
+func HandlerLog(response http.ResponseWriter, request *http.Request) {
+	//Methodos permitidos GET-OPTIONS
+	switch request.Method {
+	//para recuperar las condiciones de entrada de la tabla planif
+	case "GET":
+		getLog(response, request)
+	default:
+		jsonerror.UserMessage = fmt.Sprintf("Not implemented Method %s", request.Method)
+		//Montamos el json de error
+		JsResponser, err := json.Marshal(jsonerror)
+		//Controlar el error y devolver un 500
+		if err != nil {
+			//Informamos el json
+			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+			jsonerror.InternalMessage = fmt.Sprintf("Error json1. Descripción: %s", err.Error())
+			JsResponser, err := json.Marshal(jsonerror)
+			//si vuelve a fallar la generacion, ya grabamos en log
+			if err != nil {
+				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+				return
+			}
+			//Creamos cabecera
+			response.Header().Set("Content-Type", "application/json")
+			//movemos 500 al error
+			response.WriteHeader(http.StatusInternalServerError)
+			//grabamos el json de error
+			response.Write(JsResponser)
+			return
+		}
+		//para que funcione correctamente el orden tiene que ser este. Grabar cabecera, escribir cabecera, escribir cuerpo(json)
+		//creamos cabecera de respuesta
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 405 al error
+		response.WriteHeader(http.StatusMethodNotAllowed)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+}
+
+//getLog donde recuperar y devolver en formato txt el archivo de log
+func getLog(response http.ResponseWriter, request *http.Request) {
+	urlpath := request.URL.Path
+	id := path.Base(urlpath)
+	pathLog := "C:\\gopath\\src\\github.com\\log\\" + id
+	//abrimos el fichero
+	file, err := os.Open(pathLog)
+	if err != nil {
+		if os.IsNotExist(err) {
+			//movemos 404
+			response.WriteHeader(http.StatusNotFound)
+			return
+		}
+		//Informamos el json
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
+		jsonerror.InternalMessage = fmt.Sprintf("Error sysout. Descripción: %s", err.Error())
+		JsResponser, err := json.Marshal(jsonerror)
+		//si vuelve a fallar la generacion, ya grabamos en log
+		if err != nil {
+			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			return
+		}
+		//Creamos cabecera
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 500 al error
+		response.WriteHeader(http.StatusInternalServerError)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+	result, _ := ioutil.ReadAll(file)
+	//Creamos cabecera
+	response.Header().Set("Content-Type", "text/plain")
+	//grabamos el json de error
+	response.Write(result)
+	//fmt.Println(string(result))
 }
