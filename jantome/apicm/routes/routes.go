@@ -30,5 +30,6 @@ func Routes() {
 	http.HandleFunc("/cm/v1/planificacion/condicionout", actions.HandlerPlanifCondicionout)
 	//Endpoint para el get para las condiciones de salida de planificacion
 	http.HandleFunc("/cm/v1/planificacion/condicionout/", actions.HandlerPlanifCondicionout)
-
+	//Endpoint para recuperar el log de la ejecucion tiene / ya que ira el nombre
+	http.HandleFunc("/cm/v1/ejecuciones/logs/", actions.HandlerLog)
 }
