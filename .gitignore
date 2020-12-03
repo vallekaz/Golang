@@ -3,3 +3,4 @@ jantome/*/horas*
 jantome/*/*.env
 jantome/*/*D*H*
 log
+*.pem
