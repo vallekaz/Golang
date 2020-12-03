@@ -49,8 +49,10 @@ func OpenFicher(nombre string, entorno string, primera bool) (file *os.File) {
 	//si es la primera vez borramos el fichero
 	if primera == true {
 		err := os.Remove(pathLog)
-		if os.IsNotExist(err) == false {
-			log.Fatal(err)
+		if err != nil {
+			if os.IsNotExist(err) == false {
+				log.Fatal(err)
+			}
 		}
 	}
 	//pathLog = pathLog + nombre + formateado
