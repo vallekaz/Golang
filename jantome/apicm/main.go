@@ -11,15 +11,19 @@ import (
 	"github.com/jantome/apicm/routes"
 )
 
+//Variables globales
 var (
 	//recuperamos el entorno de ejecucion mediante flags para saber las rutas
 	entorno = flag.String("entorno", "", "entorno de ejecución")
 )
 
+//Init al arrancar
 func init() {
 	//cargamos las rutas permitidas
 	routes.Routes()
 }
+
+//funcion principal
 func main() {
 	flag.Parse()
 	//fmt.Println("entorno", *entorno)
