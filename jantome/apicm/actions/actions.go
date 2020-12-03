@@ -920,32 +920,6 @@ func getPlanificacion(response http.ResponseWriter, request *http.Request) {
 		}
 		//Acumulamos
 		acuplanificacion = append(acuplanificacion, tabplanificacion)
-		//Como no hemos tenido error creamos el json de salida
-		//JsResponser, err := json.Marshal(planificacion)
-		//Controlar el error y devolver un 500
-		/*if err != nil {
-			//Informamos el json
-			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error json2. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
-			//si vuelve a fallar la generacion, ya grabamos en log
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
-				return
-			}
-			//Creamos cabecera
-			response.Header().Set("Content-Type", "application/json")
-			//movemos 500 al error
-			response.WriteHeader(http.StatusInternalServerError)
-			//grabamos el json de error
-			response.Write(JsResponser)
-			return
-		}
-		//creamos cabecera de respuesta
-		response.Header().Set("Content-Type", "application/json")
-		//devolvemos la respuesta
-		response.Write(JsResponser)*/
-
 	}
 	//Si no tenemos datos damos error con 204
 	if !sidatos {
