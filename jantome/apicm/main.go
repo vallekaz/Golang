@@ -9,12 +9,15 @@ import (
 
 	"github.com/jantome/apicm/environment"
 	"github.com/jantome/apicm/routes"
+	"github.com/jantome/apicm/structs"
+	"github.com/onlinearq/online"
 )
 
 //Variables globales
 var (
 	//recuperamos el entorno de ejecucion mediante flags para saber las rutas
-	entorno = flag.String("entorno", "", "entorno de ejecución")
+	//entorno    = flag.String("entorno", "", "entorno de ejecución")
+	nameserver = "apicm"
 )
 
 //Init al arrancar
@@ -25,11 +28,10 @@ func init() {
 
 //funcion principal
 func main() {
+	//parseamos los flag que podamos recibir
 	flag.Parse()
-	//fmt.Println("entorno", *entorno)
-	fmt.Println("Arrancando servidor...")
 	//Cargamos la variables de entorno
-	environment.Loadenvironment(*entorno)
+	environment.Loadenvironment(*structs.Entorno)
 	port, _ := os.LookupEnv("SERV_PORT")
 	portSSL, _ := os.LookupEnv("SERV_PORT_SSL")
 	serSafe, _ := os.LookupEnv("SERV_SAFE")
@@ -38,6 +40,8 @@ func main() {
 	case "S":
 		fmt.Println("Port safe: ", portSSL)
 		fmt.Println("Starting secure server")
+		//grabamos en el log el arranque del servidor
+		online.Start(nameserver, *structs.Entorno, portSSL, "Secure Server")
 		//Arrancamos con seguridad SSL
 		err := http.ListenAndServeTLS(portSSL, "cert.pem", "key.pem", nil)
 		//controlamos el error de listener
@@ -48,6 +52,8 @@ func main() {
 	case "N":
 		fmt.Println("Port no safe: ", port)
 		fmt.Println("Starting unsecure server")
+		//grabamos en el log el arranque del servidor
+		online.Start(nameserver, *structs.Entorno, portSSL, "Unsecure Server")
 		//Ponemos a escuchar el servidor (Arrancamos, con las rutas ya montadas)
 		err := http.ListenAndServe(port, nil)
 		//Arracamos sin serguridad SSL
@@ -60,6 +66,9 @@ func main() {
 		go func() {
 			fmt.Println("Port safe: ", portSSL)
 			fmt.Println("Starting secure server")
+			//grabamos en el log el arranque del servidor
+			online.Start(nameserver, *structs.Entorno, portSSL, "Secure Server")
+
 			//Arrancamos con seguridad SSL
 			err := http.ListenAndServeTLS(portSSL, "cert.pem", "key.pem", nil)
 			//Arracamos sin serguridad SSL
@@ -70,6 +79,8 @@ func main() {
 		}()
 		fmt.Println("Port no safe: ", port)
 		fmt.Println("Starting unsecure server")
+		//grabamos en el log el arranque del servidor
+		online.Start(nameserver, *structs.Entorno, portSSL, "Unsecure Server")
 		//Ponemos a escuchar el servidor (Arrancamos, con las rutas ya montadas)
 		err := http.ListenAndServe(port, nil)
 		//Arracamos sin serguridad SSL
