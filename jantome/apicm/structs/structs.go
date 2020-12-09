@@ -1,5 +1,13 @@
 package structs
 
+import "flag"
+
+//creamos una variable para todo el servidor
+var (
+	//variable deonde recuperamos el entorno de ejecucion mediante flags
+	Entorno = flag.String("entorno", "", "entorno de ejecución")
+)
+
 //Tabejecucion estructura de la tabla
 type Tabejecucion struct {
 	Nombre   string `json:"nombre"`
