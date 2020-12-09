@@ -28,7 +28,7 @@ var (
 //Start funcion que se utilizara para generar el fichero de log nada más empezar un proceso batch
 func Start(nombre string, entorno string) {
 	//apertura del fichero, nos devuelve file para que podamos cerrarlo cuando finalicemos la funcion
-	file := OpenFicher(nombre, entorno, true)
+	file := openFicher(nombre, entorno, true)
 	//Comprobamos el tipo de error para ver que tenemos que guardar
 	infoLogger.Println("Start", nombre)
 	//Cerramos fichero
@@ -36,7 +36,7 @@ func Start(nombre string, entorno string) {
 }
 
 //OpenFicher funcion que se invocara en todos los sitios para la apertura del fichero
-func OpenFicher(nombre string, entorno string, primera bool) (file *os.File) {
+func openFicher(nombre string, entorno string, primera bool) (file *os.File) {
 	//obtenemos la ruta donde se guardaran los logs
 	//pathLog := "./" + nombre + formateado
 	environment.Loadenvironment(entorno)
@@ -73,7 +73,7 @@ func OpenFicher(nombre string, entorno string, primera bool) (file *os.File) {
 //FinOk funcion para la finalización correcta del proceso batch
 func FinOk(nombre string, entorno string) {
 	//apertura del fichero, nos devuelve file para que podamos cerrarlo cuando finalicemos la funcion
-	file := OpenFicher(nombre, entorno, false)
+	file := openFicher(nombre, entorno, false)
 	infoLogger.Println("Finish",
 		nombre,
 		"Tiempo de ejecucion: ",
@@ -84,7 +84,7 @@ func FinOk(nombre string, entorno string) {
 
 // Impr funcion que servirar para imprimir toda la info que creamos necesaria. Por ejempo estadisticas o display's
 func Impr(nombre string, inf string, tipo string, entorno string) {
-	file := OpenFicher(nombre, entorno, false)
+	file := openFicher(nombre, entorno, false)
 	switch tipo {
 	//warning
 	case "w":
@@ -104,7 +104,7 @@ func Impr(nombre string, inf string, tipo string, entorno string) {
 
 //FinKo funcion para imprimir error cuando esta KO
 func FinKo(nombre string, retorno string, descripcion string, entorno string) {
-	file := OpenFicher(nombre, entorno, false)
+	file := openFicher(nombre, entorno, false)
 	errorLogger.Println("\n¡¡¡¡¡¡Error!!!!!!\n",
 		"Retorno: ",
 		retorno,
