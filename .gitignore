@@ -4,3 +4,5 @@ jantome/*/*.env
 jantome/*/*D*H*
 log
 *.pem
+onlinearq/onlinearq.env
+batcharq/batcharq.env
