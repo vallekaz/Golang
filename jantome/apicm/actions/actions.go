@@ -769,7 +769,7 @@ func HandlerCondicionout(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-//getCondicionnout condiciones de salida en json aky
+//getCondicionnout condiciones de salida en json
 func getCondicionout(response http.ResponseWriter, request *http.Request) {
 	//Creamos la variable necesaria
 	fechaeje2 := ""
@@ -783,15 +783,26 @@ func getCondicionout(response http.ResponseWriter, request *http.Request) {
 		//nos quedamos con la primera ocurrencia por si existiese alguna más
 		fechaeje2 = fechaeje[0]
 	} else {
+		iderror = online.GeneraIDError()
 		//json de error
 		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
 		jsonerror.InternalMessage = fmt.Sprintf("Invalid Parameter url: fechaeje")
-		JsResponser, err := json.Marshal(jsonerror)
+		JsResponser, err2 := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
-		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+		if err2 != nil {
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			//Mostramos error por pantalla y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error  getCondicionout id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		mensaje := jsonerror.InternalMessage + "getCondicionout"
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, mensaje, nil)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -805,15 +816,26 @@ func getCondicionout(response http.ResponseWriter, request *http.Request) {
 	result, err := db2.EjecutaQuery(sql)
 	//Controlar el error para devolver un 500
 	if err != nil {
+		iderror = online.GeneraIDError()
 		//json de error
 		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error select condicionout. Descripción: %s", err.Error())
-		JsResponser, err := json.Marshal(jsonerror)
+		//jsonerror.InternalMessage = fmt.Sprintf("Error select condicionout. Descripción: %s", err.Error())
+		JsResponser, err2 := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
-		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+		if err2 != nil {
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			//Mostramos error por pantalla y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error  getCondicionout id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		mensaje := "Error select condicionout from ejecucion id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, mensaje, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -835,15 +857,26 @@ func getCondicionout(response http.ResponseWriter, request *http.Request) {
 		err = result.Scan(&condicionout.Condicionout)
 		//Controlar el error y devolver un 500
 		if err != nil {
+			iderror = online.GeneraIDError()
 			//json de error
 			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error scan condicionout. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
+			//jsonerror.InternalMessage = fmt.Sprintf("Error scan condicionout. Descripción: %s", err.Error())
+			JsResponser, err2 := json.Marshal(jsonerror)
 			//si falla la generacion damos error grave
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			if err2 != nil {
+				mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+				//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				//Mostramos error por pantalla y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				descripcion := "Error en la generacion del json de error  getCondicionout id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+				//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+				response.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			mensaje := "Error scan condicionout from ejecucion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, mensaje, err)
 			//Creamos cabecera
 			response.Header().Set("Content-Type", "application/json")
 			//movemos 500 al error
@@ -864,12 +897,22 @@ func getCondicionout(response http.ResponseWriter, request *http.Request) {
 			//Informamos el json
 			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
 			jsonerror.InternalMessage = fmt.Sprintf("Error json2. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
+			JsResponser, err2 := json.Marshal(jsonerror)
 			//si vuelve a fallar la generacion, ya grabamos en log
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			if err2 != nil {
+				mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+				//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				//Mostramos error por pantalla y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				descripcion := "Error en la generacion del json de error  getCondicionout id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+				//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+				response.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			mensaje := "Error genera json from ejecucion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, mensaje, err)
 			//Creamos cabecera
 			response.Header().Set("Content-Type", "application/json")
 			//movemos 500 al error
@@ -914,25 +957,21 @@ func HandlerPlanificacion(response http.ResponseWriter, request *http.Request) {
 		jsonerror.UserMessage = fmt.Sprintf("Not implemented Method %s", request.Method)
 		//Montamos el json de error
 		JsResponser, err := json.Marshal(jsonerror)
-		//Controlar el error y devolver un 500
+		//Controlar el error y grabar en log
 		if err != nil {
-			//Informamos el json
-			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error json1. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
-			//si vuelve a fallar la generacion, ya grabamos en log
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
-				return
-			}
-			//Creamos cabecera
-			response.Header().Set("Content-Type", "application/json")
-			//movemos 500 al error
+			//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error default HandlerPlanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
 			response.WriteHeader(http.StatusInternalServerError)
-			//grabamos el json de error
-			response.Write(JsResponser)
 			return
 		}
+		//Aunque saquemos mensaje de error, grabamos
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, jsonerror.UserMessage, nil)
 		//para que funcione correctamente el orden tiene que ser este. Grabar cabecera, escribir cabecera, escribir cuerpo(json)
 		//creamos cabecera de respuesta
 		response.Header().Set("Content-Type", "application/json")
@@ -993,15 +1032,25 @@ func getPlanificacion(response http.ResponseWriter, request *http.Request) {
 	result, err := db2.EjecutaQuery(sql)
 	//Controlar el error para devolver un 500
 	if err != nil {
+		//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+		iderror = online.GeneraIDError()
 		//json de error
-		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error select ejecucion. Descripción: %s", err.Error())
-		JsResponser, err := json.Marshal(jsonerror)
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+		//jsonerror.InternalMessage = fmt.Sprintf("Error select ejecucion. Descripción: %s", err.Error())
+		JsResponser, err2 := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
-		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+		if err2 != nil {
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error default getPlanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		mensaje := "Error Select FROM planificacion id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, mensaje, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -1022,15 +1071,24 @@ func getPlanificacion(response http.ResponseWriter, request *http.Request) {
 		err := result.Scan(&tabplanificacion.Nombre, &tabplanificacion.Calendario, &tabplanificacion.Useralta, &tabplanificacion.Timalta, &tabplanificacion.Usermod, &tabplanificacion.Timesmod)
 		//Controlar el error y devolver un 500
 		if err != nil {
+			iderror = online.GeneraIDError()
 			//json de error
-			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error bucle planificacion. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
+			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+			//	jsonerror.InternalMessage = fmt.Sprintf("Error bucle planificacion. Descripción: %s", err.Error())
+			JsResponser, err2 := json.Marshal(jsonerror)
 			//si falla la generacion damos error grave
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			if err2 != nil {
+				mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+				//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				descripcion := "Error en la generacion del json de error default getPlanificacion id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+				//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+				response.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			descripcion := "Error Scan Select FROM planificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
 			//Creamos cabecera
 			response.Header().Set("Content-Type", "application/json")
 			//movemos 500 al error
@@ -1074,15 +1132,24 @@ func getPlanificacion(response http.ResponseWriter, request *http.Request) {
 			defer result.Close()
 			//Controlar el error y devolver un 500
 			if err != nil {
+				iderror = online.GeneraIDError()
 				//json de error
-				jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-				jsonerror.InternalMessage = fmt.Sprintf("Error select max. Descripción: %s", err.Error())
-				JsResponser, err := json.Marshal(jsonerror)
+				jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+				//	jsonerror.InternalMessage = fmt.Sprintf("Error select max. Descripción: %s", err.Error())
+				JsResponser, err2 := json.Marshal(jsonerror)
 				//si falla la generacion damos error grave
-				if err != nil {
-					http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+				if err2 != nil {
+					mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+					//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+					http.Error(response, mensaje, http.StatusInternalServerError)
+					descripcion := "Error en la generacion del json de error default getPlanificacion id: " + iderror
+					online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+					//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+					response.WriteHeader(http.StatusInternalServerError)
 					return
 				}
+				descripcion := "Error select count from planificacoin id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
 				//Creamos cabecera
 				response.Header().Set("Content-Type", "application/json")
 				//movemos 500 al error
@@ -1128,15 +1195,24 @@ func getPlanificacion(response http.ResponseWriter, request *http.Request) {
 			JsResponser, err := json.Marshal(pieplanificacion)
 			//Controlar el error y devolver un 500
 			if err != nil {
+				iderror = online.GeneraIDError()
 				//Informamos el json
-				jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-				jsonerror.InternalMessage = fmt.Sprintf("Error json2. Descripción: %s", err.Error())
-				JsResponser, err := json.Marshal(jsonerror)
+				jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+				//	jsonerror.InternalMessage = fmt.Sprintf("Error json2. Descripción: %s", err.Error())
+				JsResponser, err2 := json.Marshal(jsonerror)
 				//si vuelve a fallar la generacion, ya grabamos en log
-				if err != nil {
-					http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+				if err2 != nil {
+					mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+					//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+					http.Error(response, mensaje, http.StatusInternalServerError)
+					descripcion := "Error en la generacion del json de error default getPlanificacion id: " + iderror
+					online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+					//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+					response.WriteHeader(http.StatusInternalServerError)
 					return
 				}
+				descripcion := "Error en la generacion del json id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 				//Creamos cabecera
 				response.Header().Set("Content-Type", "application/json")
 				//movemos 500 al error
@@ -1152,15 +1228,24 @@ func getPlanificacion(response http.ResponseWriter, request *http.Request) {
 		} else {
 			JsResponser, err := json.Marshal(acuplanificacion)
 			if err != nil {
+				iderror = online.GeneraIDError()
 				//Informamos el json
-				jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-				jsonerror.InternalMessage = fmt.Sprintf("Error json2. Descripción: %s", err.Error())
-				JsResponser, err := json.Marshal(jsonerror)
+				jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+				//	jsonerror.InternalMessage = fmt.Sprintf("Error json2. Descripción: %s", err.Error())
+				JsResponser, err2 := json.Marshal(jsonerror)
 				//si vuelve a fallar la generacion, ya grabamos en log
-				if err != nil {
-					http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+				if err2 != nil {
+					mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+					//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+					http.Error(response, mensaje, http.StatusInternalServerError)
+					descripcion := "Error en la generacion del json de error default getPlanificacion id: " + iderror
+					online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+					//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+					response.WriteHeader(http.StatusInternalServerError)
 					return
 				}
+				descripcion := "Error en la generacion del json acuplanificacion id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 				//Creamos cabecera
 				response.Header().Set("Content-Type", "application/json")
 				//movemos 500 al error
@@ -1188,6 +1273,16 @@ func options2(response http.ResponseWriter, request *http.Request) {
 	return
 }
 
+//options4 para los cors de esta api
+func options4(response http.ResponseWriter, request *http.Request) {
+	response.Header().Set("Access-Control-Allow-Origin", "*")
+	//Get lista
+	//Post create
+	//Delete delete
+	response.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+	return
+}
+
 //putPlanificacion actualización de la tabla planificacion
 func putPlanificacion(response http.ResponseWriter, request *http.Request) {
 	//De entrada tendra un json en el que tendra como obligatorio el nombre (ya que sera con el que hacemos el update)
@@ -1202,15 +1297,24 @@ func putPlanificacion(response http.ResponseWriter, request *http.Request) {
 	err := cuerpo.Decode(&putplanificacion)
 	//controlamos el error
 	if err != nil {
+		iderror = online.GeneraIDError()
 		//json de error
-		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error decode putplanificacion. Descripción: %s", err.Error())
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+		//	jsonerror.InternalMessage = fmt.Sprintf("Error decode putplanificacion. Descripción: %s", err.Error())
 		JsResponser, err := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
 		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error default putPlanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Error en el decode del json id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -1226,9 +1330,18 @@ func putPlanificacion(response http.ResponseWriter, request *http.Request) {
 		JsResponser, err := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
 		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error default putPlanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Dato obligatorio nombre putplanificacion"
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, descripcion, nil)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 400 al error
@@ -1244,9 +1357,18 @@ func putPlanificacion(response http.ResponseWriter, request *http.Request) {
 		JsResponser, err := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
 		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error default putPlanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Dato obligatorio Calendario putplanificacion"
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, descripcion, nil)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 400 al error
@@ -1262,9 +1384,18 @@ func putPlanificacion(response http.ResponseWriter, request *http.Request) {
 		JsResponser, err := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
 		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error default putPlanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Dato obligatorio Usermodif putplanificacion"
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, descripcion, nil)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 400 al error
@@ -1278,15 +1409,25 @@ func putPlanificacion(response http.ResponseWriter, request *http.Request) {
 	sql := fmt.Sprintf("SELECT COUNT(*) FROM planificacion WHERE nombre = '%s'", putplanificacion.Name)
 	result2, err := db2.EjecutaQuery(sql)
 	if err != nil {
+		iderror = online.GeneraIDError()
 		//json de error
 		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error select count planificacion. Descripción: %s", err.Error())
-		JsResponser, err := json.Marshal(jsonerror)
+		//	jsonerror.InternalMessage = fmt.Sprintf("Error select count planificacion. Descripción: %s", err.Error())
+		JsResponser, err2 := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
-		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+		if err2 != nil {
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error default putPlanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Error en count from planificacion putplanificacion id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -1304,15 +1445,25 @@ func putPlanificacion(response http.ResponseWriter, request *http.Request) {
 	err = result2.Scan(&planificacioncount.Count)
 	//Controlar el error para devolver un 500
 	if err != nil {
+		iderror = online.GeneraIDError()
 		//json de error
 		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error scan count. Descripción: %s", err.Error())
-		JsResponser, err := json.Marshal(jsonerror)
+		//	jsonerror.InternalMessage = fmt.Sprintf("Error scan count. Descripción: %s", err.Error())
+		JsResponser, err2 := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
-		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+		if err2 != nil {
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error default putPlanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Error en scan del count putPlanificacion id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -1332,15 +1483,25 @@ func putPlanificacion(response http.ResponseWriter, request *http.Request) {
 		defer result.Close()
 		//Controlar el error para devolver un 500
 		if err != nil {
+			iderror = online.GeneraIDError()
 			//json de error
 			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
 			jsonerror.InternalMessage = fmt.Sprintf("Error update planificacion. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
+			JsResponser, err2 := json.Marshal(jsonerror)
 			//si falla la generacion damos error grave
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			if err2 != nil {
+				iderror = online.GeneraIDError()
+				mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+				//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				descripcion := "Error en la generacion del json de error default putPlanificacion id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+				//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+				response.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			descripcion := "Error en el update planificacion putplanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 			//Creamos cabecera
 			response.Header().Set("Content-Type", "application/json")
 			//movemos 500 al error
@@ -1368,15 +1529,24 @@ func postPlanificacion(response http.ResponseWriter, request *http.Request) {
 	err := cuerpo.Decode(&postplanificacion)
 	//controlamos el error
 	if err != nil {
+		iderror = online.GeneraIDError()
 		//json de error
-		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error decode putplanificacion. Descripción: %s", err.Error())
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s ", iderror)
+		//jsonerror.InternalMessage = fmt.Sprintf("Error decode putplanificacion. Descripción: %s", err.Error())
 		JsResponser, err := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
 		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error postPlanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Error decode cuerpo postplanificacion id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -1393,9 +1563,19 @@ func postPlanificacion(response http.ResponseWriter, request *http.Request) {
 		JsResponser, err := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
 		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error postPlanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Dato obligatorio nombre postplanificacion "
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, descripcion, nil)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 400 al error
@@ -1411,9 +1591,19 @@ func postPlanificacion(response http.ResponseWriter, request *http.Request) {
 		JsResponser, err := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
 		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error postPlanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Dato obligatorio Calendar postplanificacion "
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, descripcion, nil)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 400 al error
@@ -1429,9 +1619,19 @@ func postPlanificacion(response http.ResponseWriter, request *http.Request) {
 		JsResponser, err := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
 		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error postPlanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Dato obligatorio Useralt postplanificacion "
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, descripcion, nil)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 400 al error
@@ -1446,15 +1646,24 @@ func postPlanificacion(response http.ResponseWriter, request *http.Request) {
 	result, err := db2.EjecutaQuery(sql)
 	//Controlar el error para devolver un 500
 	if err != nil {
+		iderror = online.GeneraIDError()
 		//json de error
 		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error update planificacion. Descripción: %s", err.Error())
-		JsResponser, err := json.Marshal(jsonerror)
+		//	jsonerror.InternalMessage = fmt.Sprintf("Error update planificacion. Descripción: %s", err.Error())
+		JsResponser, err2 := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
-		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+		if err2 != nil {
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error postPlanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Error en el insert planificacion id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -1481,15 +1690,24 @@ func deletePlanificacion(response http.ResponseWriter, request *http.Request) {
 		sql := fmt.Sprintf("SELECT COUNT(*) FROM planificacion WHERE nombre = '%s'", id)
 		result2, err := db2.EjecutaQuery(sql)
 		if err != nil {
+			iderror = online.GeneraIDError()
 			//json de error
 			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error select count planificacion. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
+			//		jsonerror.InternalMessage = fmt.Sprintf("Error select count planificacion. Descripción: %s", err.Error())
+			JsResponser, err2 := json.Marshal(jsonerror)
 			//si falla la generacion damos error grave
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			if err2 != nil {
+				mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+				//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				descripcion := "Error en la generacion del json de error deletePlanificacion id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+				//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+				response.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			descripcion := "Error select count deleteplanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
 			//Creamos cabecera
 			response.Header().Set("Content-Type", "application/json")
 			//movemos 500 al error
@@ -1507,15 +1725,24 @@ func deletePlanificacion(response http.ResponseWriter, request *http.Request) {
 		err = result2.Scan(&planificacioncount.Count)
 		//Controlar el error para devolver un 500
 		if err != nil {
+			iderror = online.GeneraIDError()
 			//json de error
 			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error scan count. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
+			//		jsonerror.InternalMessage = fmt.Sprintf("Error scan count. Descripción: %s", err.Error())
+			JsResponser, err2 := json.Marshal(jsonerror)
 			//si falla la generacion damos error grave
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			if err2 != nil {
+				mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+				//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				descripcion := "Error en la generacion del json de error deleteplanificacion id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+				//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+				response.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			descripcion := "Error scan count deleteplanificacion id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
 			//Creamos cabecera
 			response.Header().Set("Content-Type", "application/json")
 			//movemos 500 al error
@@ -1533,15 +1760,24 @@ func deletePlanificacion(response http.ResponseWriter, request *http.Request) {
 			defer result.Close()
 			//Controlar el error para devolver un 500
 			if err != nil {
+				iderror = online.GeneraIDError()
 				//json de error
 				jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-				jsonerror.InternalMessage = fmt.Sprintf("Error delete planificacion. Descripción: %s", err.Error())
-				JsResponser, err := json.Marshal(jsonerror)
+				//		jsonerror.InternalMessage = fmt.Sprintf("Error delete planificacion. Descripción: %s", err.Error())
+				JsResponser, err2 := json.Marshal(jsonerror)
 				//si falla la generacion damos error grave
-				if err != nil {
-					http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+				if err2 != nil {
+					mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+					//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+					http.Error(response, mensaje, http.StatusInternalServerError)
+					descripcion := "Error en la generacion del json de error deleteplanificacion id: " + iderror
+					online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+					//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+					response.WriteHeader(http.StatusInternalServerError)
 					return
 				}
+				descripcion := "Error en el delete deleteplanificacion id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 				//Creamos cabecera
 				response.Header().Set("Content-Type", "application/json")
 				//movemos 500 al error
@@ -1574,30 +1810,26 @@ func HandlerPlanifCondicionin(response http.ResponseWriter, request *http.Reques
 		delCondicionin(response, request)
 	//tenemos que habilitar el metodo options, para que se puedan verificar los cors
 	case "OPTIONS":
-		options2(response, request)
+		options4(response, request)
 	default:
 		jsonerror.UserMessage = fmt.Sprintf("Not implemented Method %s", request.Method)
 		//Montamos el json de error
 		JsResponser, err := json.Marshal(jsonerror)
-		//Controlar el error y devolver un 500
+		//Controlar el error y grabar en log
 		if err != nil {
-			//Informamos el json
-			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error json1. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
-			//si vuelve a fallar la generacion, ya grabamos en log
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
-				return
-			}
-			//Creamos cabecera
-			response.Header().Set("Content-Type", "application/json")
-			//movemos 500 al error
+			//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error default HandlerPlanifCondicionin id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
 			response.WriteHeader(http.StatusInternalServerError)
-			//grabamos el json de error
-			response.Write(JsResponser)
 			return
 		}
+		//Aunque saquemos mensaje de error, grabamos
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, jsonerror.UserMessage, nil)
 		//para que funcione correctamente el orden tiene que ser este. Grabar cabecera, escribir cabecera, escribir cuerpo(json)
 		//creamos cabecera de respuesta
 		response.Header().Set("Content-Type", "application/json")
@@ -1619,15 +1851,26 @@ func getcondicionin2(response http.ResponseWriter, request *http.Request) {
 	result, err := db2.EjecutaQuery(sql)
 	//Controlar el error para devolver un 500
 	if err != nil {
+		iderror = online.GeneraIDError()
 		//json de error
 		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error select condicionin. Descripción: %s", err.Error())
-		JsResponser, err := json.Marshal(jsonerror)
+		//	jsonerror.InternalMessage = fmt.Sprintf("Error select condicionin. Descripción: %s", err.Error())
+		JsResponser, err2 := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
-		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+		if err2 != nil {
+			//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error default getcondicionin2 id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Error select condicionin from planificacion getcondicionin2 id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -1649,15 +1892,26 @@ func getcondicionin2(response http.ResponseWriter, request *http.Request) {
 		err = result.Scan(&condicionin.Condicionin)
 		//Controlar el error y devolver un 500
 		if err != nil {
+			iderror = online.GeneraIDError()
 			//json de error
-			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error scan condicion. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
+			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s ", iderror)
+			//	jsonerror.InternalMessage = fmt.Sprintf("Error scan condicion. Descripción: %s", err.Error())
+			JsResponser, err2 := json.Marshal(jsonerror)
 			//si falla la generacion damos error grave
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			if err2 != nil {
+				//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+				iderror = online.GeneraIDError()
+				mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+				//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				descripcion := "Error en la generacion del json de error default getcondicionin2 id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+				//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+				response.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			descripcion := "Error scan select condicion2 getcondicionin2 id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 			//Creamos cabecera
 			response.Header().Set("Content-Type", "application/json")
 			//movemos 500 al error
@@ -1673,15 +1927,26 @@ func getcondicionin2(response http.ResponseWriter, request *http.Request) {
 	if sidatos {
 		JsResponser, err := json.Marshal(jsoncondicionin)
 		if err != nil {
+			iderror = online.GeneraIDError()
 			//Informamos el json
 			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
 			jsonerror.InternalMessage = fmt.Sprintf("Error json2. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
+			JsResponser, err2 := json.Marshal(jsonerror)
 			//si vuelve a fallar la generacion, ya grabamos en log
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			if err2 != nil {
+				//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+				iderror = online.GeneraIDError()
+				mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+				//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				descripcion := "Error en la generacion del json de error default getcondicionin2 id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+				//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+				response.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			descripcion := "Error en la generacion del json de salida getcondicionin2 id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 			//Creamos cabecera
 			response.Header().Set("Content-Type", "application/json")
 			//movemos 500 al error
@@ -1714,15 +1979,25 @@ func postCondicionin(response http.ResponseWriter, request *http.Request) {
 	err := cuerpo.Decode(&postcondicionin)
 	//controlamos el error
 	if err != nil {
+		//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+		iderror = online.GeneraIDError()
 		//json de error
-		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error decode postcondicionin. Descripción: %s", err.Error())
-		JsResponser, err := json.Marshal(jsonerror)
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+		//	jsonerror.InternalMessage = fmt.Sprintf("Error decode postcondicionin. Descripción: %s", err.Error())
+		JsResponser, err2 := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
-		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+		if err2 != nil {
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error default postCondicionin id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Error dedoce body postCondicionin id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -1740,15 +2015,24 @@ func postCondicionin(response http.ResponseWriter, request *http.Request) {
 				result, err := db2.EjecutaQuery(sql)
 				//controlamos error
 				if err != nil {
+					iderror = online.GeneraIDError()
 					//json de error
-					jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-					jsonerror.InternalMessage = fmt.Sprintf("Error select calendario planificacion. Descripción: %s", err.Error())
-					JsResponser, err := json.Marshal(jsonerror)
+					jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+					//		jsonerror.InternalMessage = fmt.Sprintf("Error select calendario planificacion. Descripción: %s", err.Error())
+					JsResponser, err2 := json.Marshal(jsonerror)
 					//si falla la generacion damos error grave
-					if err != nil {
-						http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+					if err2 != nil {
+						mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+						//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+						http.Error(response, mensaje, http.StatusInternalServerError)
+						descripcion := "Error en la generacion del json de error default postCondicionin id: " + iderror
+						online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+						//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+						response.WriteHeader(http.StatusInternalServerError)
 						return
 					}
+					descripcion := "Error en la select calendario from planifcacion postcondicionin: " + iderror
+					online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 					//Creamos cabecera
 					response.Header().Set("Content-Type", "application/json")
 					//movemos 500 al error
@@ -1766,15 +2050,24 @@ func postCondicionin(response http.ResponseWriter, request *http.Request) {
 					err = result.Scan(&calendarplanificacion.Calendario)
 					defer result.Close()
 					if err != nil {
+						iderror = online.GeneraIDError()
 						//json de error
-						jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-						jsonerror.InternalMessage = fmt.Sprintf("Error scan calendarplanificacion. Descripción: %s", err.Error())
-						JsResponser, err := json.Marshal(jsonerror)
+						jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+						//			jsonerror.InternalMessage = fmt.Sprintf("Error scan calendarplanificacion. Descripción: %s", err.Error())
+						JsResponser, err2 := json.Marshal(jsonerror)
 						//si falla la generacion damos error grave
-						if err != nil {
-							http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+						if err2 != nil {
+							mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+							//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+							http.Error(response, mensaje, http.StatusInternalServerError)
+							descripcion := "Error en la generacion del json de error default postCondicionin id: " + iderror
+							online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+							//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+							response.WriteHeader(http.StatusInternalServerError)
 							return
 						}
+						descripcion := "Error en la scan select postCondicionin id: " + iderror
+						online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 						//Creamos cabecera
 						response.Header().Set("Content-Type", "application/json")
 						//movemos 500 al error
@@ -1790,15 +2083,24 @@ func postCondicionin(response http.ResponseWriter, request *http.Request) {
 					//ejecutamos la query
 					result, err = db2.EjecutaQuery(sql)
 					if err != nil {
+						iderror = online.GeneraIDError()
 						//json de error
-						jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-						jsonerror.InternalMessage = fmt.Sprintf("Error insert condicionin planificacion. Descripción: %s", err.Error())
-						JsResponser, err := json.Marshal(jsonerror)
+						jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+						//	jsonerror.InternalMessage = fmt.Sprintf("Error insert condicionin planificacion. Descripción: %s", err.Error())
+						JsResponser, err2 := json.Marshal(jsonerror)
 						//si falla la generacion damos error grave
-						if err != nil {
-							http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+						if err2 != nil {
+							mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+							//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+							http.Error(response, mensaje, http.StatusInternalServerError)
+							descripcion := "Error en la generacion del json de error default postCondicionin id: " + iderror
+							online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+							//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+							response.WriteHeader(http.StatusInternalServerError)
 							return
 						}
+						descripcion := "Error insert planificacion postCondicionin id: " + iderror
+						online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 						//Creamos cabecera
 						response.Header().Set("Content-Type", "application/json")
 						//movemos 500 al error
@@ -1812,19 +2114,27 @@ func postCondicionin(response http.ResponseWriter, request *http.Request) {
 					defer result.Close()
 				}
 				if !datos {
+					descripcion := "Dato no encontrado postCondicionin "
+					online.EjecutaInfo(nombreservicio, *structs.Entorno, descripcion, nil)
 					//movemos 204 al error
 					response.WriteHeader(http.StatusNotFound)
 					return
 				}
 			} else {
+				descripcion := "Dato obligatorio Useralt postCondicionin "
+				online.EjecutaInfo(nombreservicio, *structs.Entorno, descripcion, nil)
 				response.WriteHeader(http.StatusBadRequest)
 				return
 			}
 		} else {
+			descripcion := "Dato obligatorio Condicionin postCondicionin "
+			online.EjecutaInfo(nombreservicio, *structs.Entorno, descripcion, nil)
 			response.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	} else {
+		descripcion := "Dato obligatorio Name postCondicionin "
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, descripcion, nil)
 		response.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -1848,15 +2158,25 @@ func delCondicionin(response http.ResponseWriter, request *http.Request) {
 	sql := fmt.Sprintf("SELECT COUNT(*) FROM planificacion WHERE nombre = '%s' AND condicionin = '%s'", id, condicion2)
 	result, err := db2.EjecutaQuery(sql)
 	if err != nil {
+		//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+		iderror = online.GeneraIDError()
 		//json de error
-		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error select count planificacion. Descripción: %s", err.Error())
-		JsResponser, err := json.Marshal(jsonerror)
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+		//jsonerror.InternalMessage = fmt.Sprintf("Error select count planificacion. Descripción: %s", err.Error())
+		JsResponser, err2 := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
-		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+		if err2 != nil {
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error delCondicionin id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Error eselect count delCondicionin id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -1874,15 +2194,24 @@ func delCondicionin(response http.ResponseWriter, request *http.Request) {
 	err = result.Scan(&planificacioncount.Count)
 	//Controlar el error para devolver un 500
 	if err != nil {
+		iderror = online.GeneraIDError()
 		//json de error
-		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error scan count. Descripción: %s", err.Error())
-		JsResponser, err := json.Marshal(jsonerror)
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+		//	jsonerror.InternalMessage = fmt.Sprintf("Error scan count. Descripción: %s", err.Error())
+		JsResponser, err2 := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
-		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+		if err2 != nil {
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error delCondicionin id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Error scan delCondicionin id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -1899,15 +2228,24 @@ func delCondicionin(response http.ResponseWriter, request *http.Request) {
 		defer result.Close()
 		//Controlar el error para devolver un 500
 		if err != nil {
+			iderror = online.GeneraIDError()
 			//json de error
 			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error delete planificacion condicionin. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
+			//		jsonerror.InternalMessage = fmt.Sprintf("Error delete planificacion condicionin. Descripción: %s", err.Error())
+			JsResponser, err2 := json.Marshal(jsonerror)
 			//si falla la generacion damos error grave
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			if err2 != nil {
+				mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+				//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				descripcion := "Error en la generacion del json de error delCondicionin id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+				//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+				response.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			descripcion := "Error delete delCondicionin id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 			//Creamos cabecera
 			response.Header().Set("Content-Type", "application/json")
 			//movemos 500 al error
@@ -1931,30 +2269,26 @@ func HandlerCalendar(response http.ResponseWriter, request *http.Request) {
 		getCalendar(response, request)
 	//tenemos que habilitar el metodo options, para que se puedan verificar los cors
 	case "OPTIONS":
-		options1(response, request)
+		options3(response, request)
 	default:
 		jsonerror.UserMessage = fmt.Sprintf("Not implemented Method %s", request.Method)
 		//Montamos el json de error
 		JsResponser, err := json.Marshal(jsonerror)
-		//Controlar el error y devolver un 500
+		//Controlar el error y grabar en log
 		if err != nil {
-			//Informamos el json
-			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error json1. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
-			//si vuelve a fallar la generacion, ya grabamos en log
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
-				return
-			}
-			//Creamos cabecera
-			response.Header().Set("Content-Type", "application/json")
-			//movemos 500 al error
+			//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error default HandlerPlanifCondicionin id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
 			response.WriteHeader(http.StatusInternalServerError)
-			//grabamos el json de error
-			response.Write(JsResponser)
 			return
 		}
+		//Aunque saquemos mensaje de error, grabamos
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, jsonerror.UserMessage, nil)
 		//para que funcione correctamente el orden tiene que ser este. Grabar cabecera, escribir cabecera, escribir cuerpo(json)
 		//creamos cabecera de respuesta
 		response.Header().Set("Content-Type", "application/json")
@@ -1975,15 +2309,25 @@ func getCalendar(response http.ResponseWriter, request *http.Request) {
 	sql := fmt.Sprintf("SELECT nombre FROM calendarios WHERE year = %s", anno)
 	result, err := db2.EjecutaQuery(sql)
 	if err != nil {
+		//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+		iderror = online.GeneraIDError()
 		//json de error
-		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error select ejecucion. Descripción: %s", err.Error())
-		JsResponser, err := json.Marshal(jsonerror)
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+		//jsonerror.InternalMessage = fmt.Sprintf("Error select ejecucion. Descripción: %s", err.Error())
+		JsResponser, err2 := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
-		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+		if err2 != nil {
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error default getCalendar id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Error select getCalendar id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -2004,15 +2348,24 @@ func getCalendar(response http.ResponseWriter, request *http.Request) {
 		err := result.Scan(&calendar.Name)
 		//Controlar el error y devolver un 500
 		if err != nil {
+			iderror = online.GeneraIDError()
 			//json de error
 			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error bucle calendar. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
+			//		jsonerror.InternalMessage = fmt.Sprintf("Error bucle calendar. Descripción: %s", err.Error())
+			JsResponser, err2 := json.Marshal(jsonerror)
 			//si falla la generacion damos error grave
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			if err2 != nil {
+				mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+				//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				descripcion := "Error en la generacion del json de error getCalendar id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+				//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+				response.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			descripcion := "Error scan getCalendar id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 			//Creamos cabecera
 			response.Header().Set("Content-Type", "application/json")
 			//movemos 500 al error
@@ -2033,15 +2386,24 @@ func getCalendar(response http.ResponseWriter, request *http.Request) {
 	if sidatos {
 		JsResponser, err := json.Marshal(acucalendar)
 		if err != nil {
+			iderror = online.GeneraIDError()
 			//Informamos el json
-			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error json2. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
+			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+			//	jsonerror.InternalMessage = fmt.Sprintf("Error json2. Descripción: %s", err.Error())
+			JsResponser, err2 := json.Marshal(jsonerror)
 			//si vuelve a fallar la generacion, ya grabamos en log
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			if err2 != nil {
+				mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+				//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				descripcion := "Error en la generacion del json de error getCalendar id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+				//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+				response.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			descripcion := "Error en la generacion del json  getCalendar id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 			//Creamos cabecera
 			response.Header().Set("Content-Type", "application/json")
 			//movemos 500 al error
@@ -2071,30 +2433,26 @@ func HandlerPlanifCondicionout(response http.ResponseWriter, request *http.Reque
 		delCondicionout(response, request)
 	//tenemos que habilitar el metodo options, para que se puedan verificar los cors
 	case "OPTIONS":
-		options2(response, request)
+		options4(response, request)
 	default:
 		jsonerror.UserMessage = fmt.Sprintf("Not implemented Method %s", request.Method)
 		//Montamos el json de error
 		JsResponser, err := json.Marshal(jsonerror)
-		//Controlar el error y devolver un 500
+		//Controlar el error y grabar en log
 		if err != nil {
-			//Informamos el json
-			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error json1. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
-			//si vuelve a fallar la generacion, ya grabamos en log
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
-				return
-			}
-			//Creamos cabecera
-			response.Header().Set("Content-Type", "application/json")
-			//movemos 500 al error
+			//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error default HandlerPlanifCondicionout id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
 			response.WriteHeader(http.StatusInternalServerError)
-			//grabamos el json de error
-			response.Write(JsResponser)
 			return
 		}
+		//Aunque saquemos mensaje de error, grabamos
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, jsonerror.UserMessage, nil)
 		//para que funcione correctamente el orden tiene que ser este. Grabar cabecera, escribir cabecera, escribir cuerpo(json)
 		//creamos cabecera de respuesta
 		response.Header().Set("Content-Type", "application/json")
@@ -2116,15 +2474,25 @@ func getcondicionout2(response http.ResponseWriter, request *http.Request) {
 	result, err := db2.EjecutaQuery(sql)
 	//Controlar el error para devolver un 500
 	if err != nil {
+		//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+		iderror = online.GeneraIDError()
 		//json de error
-		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error select condicionin. Descripción: %s", err.Error())
-		JsResponser, err := json.Marshal(jsonerror)
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+		//	jsonerror.InternalMessage = fmt.Sprintf("Error select condicionin. Descripción: %s", err.Error())
+		JsResponser, err2 := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
-		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+		if err2 != nil {
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error getcondicionout2 id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Error select from planificacion getcondicionout2 id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -2146,15 +2514,24 @@ func getcondicionout2(response http.ResponseWriter, request *http.Request) {
 		err = result.Scan(&condicionout.Condicionout)
 		//Controlar el error y devolver un 500
 		if err != nil {
+			iderror = online.GeneraIDError()
 			//json de error
-			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error scan condicion. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
+			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+			//		jsonerror.InternalMessage = fmt.Sprintf("Error scan condicion. Descripción: %s", err.Error())
+			JsResponser, err2 := json.Marshal(jsonerror)
 			//si falla la generacion damos error grave
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			if err2 != nil {
+				mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+				//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				descripcion := "Error en la generacion del json de error getcondicionout2 id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+				//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+				response.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			descripcion := "Error scan select getcondicionout2 id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 			//Creamos cabecera
 			response.Header().Set("Content-Type", "application/json")
 			//movemos 500 al error
@@ -2170,15 +2547,24 @@ func getcondicionout2(response http.ResponseWriter, request *http.Request) {
 	if sidatos {
 		JsResponser, err := json.Marshal(jsoncondicionout)
 		if err != nil {
+			iderror = online.GeneraIDError()
 			//Informamos el json
-			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error json2. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
+			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+			//		jsonerror.InternalMessage = fmt.Sprintf("Error json2. Descripción: %s", err.Error())
+			JsResponser, err2 := json.Marshal(jsonerror)
 			//si vuelve a fallar la generacion, ya grabamos en log
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			if err2 != nil {
+				mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+				//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				descripcion := "Error en la generacion del json de error getcondicionout2 id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+				//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+				response.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			descripcion := "Error en la generacion del json  getcondicionout2 id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 			//Creamos cabecera
 			response.Header().Set("Content-Type", "application/json")
 			//movemos 500 al error
@@ -2211,15 +2597,24 @@ func postCondicionout(response http.ResponseWriter, request *http.Request) {
 	err := cuerpo.Decode(&postcondicionout)
 	//controlamos el error
 	if err != nil {
+		iderror = online.GeneraIDError()
 		//json de error
-		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error decode postcondicionout. Descripción: %s", err.Error())
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+		//	jsonerror.InternalMessage = fmt.Sprintf("Error decode postcondicionout. Descripción: %s", err.Error())
 		JsResponser, err := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
 		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error postCondicionout id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Error decode body postCondicionout id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -2237,15 +2632,24 @@ func postCondicionout(response http.ResponseWriter, request *http.Request) {
 				result, err := db2.EjecutaQuery(sql)
 				//controlamos error
 				if err != nil {
+					iderror = online.GeneraIDError()
 					//json de error
-					jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-					jsonerror.InternalMessage = fmt.Sprintf("Error select calendario planificacion. Descripción: %s", err.Error())
-					JsResponser, err := json.Marshal(jsonerror)
+					jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+					//	jsonerror.InternalMessage = fmt.Sprintf("Error select calendario planificacion. Descripción: %s", err.Error())
+					JsResponser, err2 := json.Marshal(jsonerror)
 					//si falla la generacion damos error grave
-					if err != nil {
-						http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+					if err2 != nil {
+						mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+						//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+						http.Error(response, mensaje, http.StatusInternalServerError)
+						descripcion := "Error en la generacion del json de error postCondicionout id: " + iderror
+						online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+						//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+						response.WriteHeader(http.StatusInternalServerError)
 						return
 					}
+					descripcion := "Error select calendario from planificacion postCondicionout id: " + iderror
+					online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 					//Creamos cabecera
 					response.Header().Set("Content-Type", "application/json")
 					//movemos 500 al error
@@ -2263,15 +2667,24 @@ func postCondicionout(response http.ResponseWriter, request *http.Request) {
 					err = result.Scan(&calendarplanificacion.Calendario)
 					defer result.Close()
 					if err != nil {
+						iderror = online.GeneraIDError()
 						//json de error
 						jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-						jsonerror.InternalMessage = fmt.Sprintf("Error scan calendarplanificacion. Descripción: %s", err.Error())
-						JsResponser, err := json.Marshal(jsonerror)
+						//		jsonerror.InternalMessage = fmt.Sprintf("Error scan calendarplanificacion. Descripción: %s", err.Error())
+						JsResponser, err2 := json.Marshal(jsonerror)
 						//si falla la generacion damos error grave
-						if err != nil {
-							http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+						if err2 != nil {
+							mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+							//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+							http.Error(response, mensaje, http.StatusInternalServerError)
+							descripcion := "Error en la generacion del json de error postCondicionout id: " + iderror
+							online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+							//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+							response.WriteHeader(http.StatusInternalServerError)
 							return
 						}
+						descripcion := "Error scan postCondicionout id: " + iderror
+						online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 						//Creamos cabecera
 						response.Header().Set("Content-Type", "application/json")
 						//movemos 500 al error
@@ -2288,14 +2701,22 @@ func postCondicionout(response http.ResponseWriter, request *http.Request) {
 					result, err = db2.EjecutaQuery(sql)
 					if err != nil {
 						//json de error
-						jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-						jsonerror.InternalMessage = fmt.Sprintf("Error insert condicionin planificacion. Descripción: %s", err.Error())
-						JsResponser, err := json.Marshal(jsonerror)
+						jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+						//		jsonerror.InternalMessage = fmt.Sprintf("Error insert condicionin planificacion. Descripción: %s", err.Error())
+						JsResponser, err2 := json.Marshal(jsonerror)
 						//si falla la generacion damos error grave
-						if err != nil {
-							http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+						if err2 != nil {
+							mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+							//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+							http.Error(response, mensaje, http.StatusInternalServerError)
+							descripcion := "Error en la generacion del json de error postCondicionout id: " + iderror
+							online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+							//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+							response.WriteHeader(http.StatusInternalServerError)
 							return
 						}
+						descripcion := "Error einsert postCondicionout id: " + iderror
+						online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 						//Creamos cabecera
 						response.Header().Set("Content-Type", "application/json")
 						//movemos 500 al error
@@ -2309,19 +2730,27 @@ func postCondicionout(response http.ResponseWriter, request *http.Request) {
 					defer result.Close()
 				}
 				if !datos {
+					descripcion := "Error no encontrado postCondicionout id: " + iderror
+					online.EjecutaInfo(nombreservicio, *structs.Entorno, descripcion, err)
 					//movemos 204 al error
 					response.WriteHeader(http.StatusNotFound)
 					return
 				}
 			} else {
+				descripcion := "Falta dato obligatorio Useralt postCondicionout id: " + iderror
+				online.EjecutaInfo(nombreservicio, *structs.Entorno, descripcion, err)
 				response.WriteHeader(http.StatusBadRequest)
 				return
 			}
 		} else {
+			descripcion := "Falta dato obligatorio Condicionout postCondicionout id: " + iderror
+			online.EjecutaInfo(nombreservicio, *structs.Entorno, descripcion, err)
 			response.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	} else {
+		descripcion := "Falta dato obligatorio Name postCondicionout id: " + iderror
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, descripcion, err)
 		response.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -2345,15 +2774,24 @@ func delCondicionout(response http.ResponseWriter, request *http.Request) {
 	sql := fmt.Sprintf("SELECT COUNT(*) FROM planificacion WHERE nombre = '%s' AND condicionout = '%s'", id, condicion2)
 	result, err := db2.EjecutaQuery(sql)
 	if err != nil {
+		iderror = online.GeneraIDError()
 		//json de error
-		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error select count planificacion. Descripción: %s", err.Error())
-		JsResponser, err := json.Marshal(jsonerror)
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+		//	jsonerror.InternalMessage = fmt.Sprintf("Error select count planificacion. Descripción: %s", err.Error())
+		JsResponser, err2 := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
-		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+		if err2 != nil {
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error delCondicionout id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Error select count delCondicionout id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -2371,15 +2809,24 @@ func delCondicionout(response http.ResponseWriter, request *http.Request) {
 	err = result.Scan(&planificacioncount.Count)
 	//Controlar el error para devolver un 500
 	if err != nil {
+		iderror = online.GeneraIDError()
 		//json de error
-		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error scan count. Descripción: %s", err.Error())
-		JsResponser, err := json.Marshal(jsonerror)
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+		//	jsonerror.InternalMessage = fmt.Sprintf("Error scan count. Descripción: %s", err.Error())
+		JsResponser, err2 := json.Marshal(jsonerror)
 		//si falla la generacion damos error grave
-		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+		if err2 != nil {
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error delCondicionout id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Error scan select delCondicionout id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
@@ -2398,13 +2845,21 @@ func delCondicionout(response http.ResponseWriter, request *http.Request) {
 		if err != nil {
 			//json de error
 			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error delete planificacion condicionin. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
+			//	jsonerror.InternalMessage = fmt.Sprintf("Error delete planificacion condicionin. Descripción: %s", err.Error())
+			JsResponser, err2 := json.Marshal(jsonerror)
 			//si falla la generacion damos error grave
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+			if err2 != nil {
+				mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+				//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+				http.Error(response, mensaje, http.StatusInternalServerError)
+				descripcion := "Error en la generacion del json de error  delCondicionout id: " + iderror
+				online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err2)
+				//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+				response.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			descripcion := "Error delete delCondicionout id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 			//Creamos cabecera
 			response.Header().Set("Content-Type", "application/json")
 			//movemos 500 al error
@@ -2426,29 +2881,27 @@ func HandlerLog(response http.ResponseWriter, request *http.Request) {
 	//para recuperar las condiciones de entrada de la tabla planif
 	case "GET":
 		getLog(response, request)
+	case "OPTIONS":
+		options3(response, request)
 	default:
 		jsonerror.UserMessage = fmt.Sprintf("Not implemented Method %s", request.Method)
 		//Montamos el json de error
 		JsResponser, err := json.Marshal(jsonerror)
-		//Controlar el error y devolver un 500
+		//Controlar el error y grabar en log
 		if err != nil {
-			//Informamos el json
-			jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-			jsonerror.InternalMessage = fmt.Sprintf("Error json1. Descripción: %s", err.Error())
-			JsResponser, err := json.Marshal(jsonerror)
-			//si vuelve a fallar la generacion, ya grabamos en log
-			if err != nil {
-				http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
-				return
-			}
-			//Creamos cabecera
-			response.Header().Set("Content-Type", "application/json")
-			//movemos 500 al error
+			//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error  HandlerLog id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
 			response.WriteHeader(http.StatusInternalServerError)
-			//grabamos el json de error
-			response.Write(JsResponser)
 			return
 		}
+		//Aunque saquemos mensaje de error, grabamos
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, jsonerror.UserMessage, nil)
 		//para que funcione correctamente el orden tiene que ser este. Grabar cabecera, escribir cabecera, escribir cuerpo(json)
 		//creamos cabecera de respuesta
 		response.Header().Set("Content-Type", "application/json")
@@ -2468,20 +2921,31 @@ func getLog(response http.ResponseWriter, request *http.Request) {
 	//abrimos el fichero
 	file, err := os.Open(pathLog)
 	if err != nil {
+		//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+		iderror = online.GeneraIDError()
 		if os.IsNotExist(err) {
 			//movemos 404
 			response.WriteHeader(http.StatusNotFound)
 			return
 		}
 		//Informamos el json
-		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support")
-		jsonerror.InternalMessage = fmt.Sprintf("Error sysout. Descripción: %s", err.Error())
+		jsonerror.UserMessage = fmt.Sprintf("Internal error, contact support id: %s", iderror)
+		//	jsonerror.InternalMessage = fmt.Sprintf("Error sysout. Descripción: %s", err.Error())
 		JsResponser, err := json.Marshal(jsonerror)
 		//si vuelve a fallar la generacion, ya grabamos en log
 		if err != nil {
-			http.Error(response, "Error Grave generacion Json de error", http.StatusInternalServerError)
+
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error  getLog id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		descripcion := "Error Open log getLog id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
 		//Creamos cabecera
 		response.Header().Set("Content-Type", "application/json")
 		//movemos 500 al error
