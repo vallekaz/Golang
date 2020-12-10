@@ -6,3 +6,4 @@ log
 *.pem
 onlinearq/onlinearq.env
 batcharq/batcharq.env
+onlinearq/online/onlinearq.env
