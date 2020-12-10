@@ -4,9 +4,10 @@ import (
 	//para darle formato a la variable
 	"fmt"
 	"os"
+
 	//Librerías para base de datos
 	"database/sql"
-
+	//Para base de datos mysql
 	_ "github.com/go-sql-driver/mysql"
 )
 
