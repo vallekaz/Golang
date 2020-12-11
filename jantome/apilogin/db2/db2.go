@@ -7,7 +7,7 @@ import (
 
 	//Librerías para base de datos
 	"database/sql"
-
+	//Librería para la conexión con mysql
 	_ "github.com/go-sql-driver/mysql"
 )
 
