@@ -41,8 +41,8 @@ func Loadenvironment(entorno string) {
 
 	//******SERVIDOR******//
 	os.LookupEnv("SERV_PORT")
-	os.LookupEnv("LOG_ACTIVATE")
-	os.LookupEnv("PATH_LOG")
+	os.LookupEnv("SERV_PORT_SSL")
+	os.LookupEnv("SERV_SAFE")
 	//******SERVIDOR******//
 
 }
