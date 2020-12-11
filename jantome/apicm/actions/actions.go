@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -10,6 +11,8 @@ import (
 	"path"
 	"strconv"
 	"time"
+
+	"github.com/jantome/apicm/environment"
 
 	"github.com/jantome/apicm/structs"
 	"github.com/onlinearq/online"
@@ -2934,7 +2937,6 @@ func getLog(response http.ResponseWriter, request *http.Request) {
 		JsResponser, err := json.Marshal(jsonerror)
 		//si vuelve a fallar la generacion, ya grabamos en log
 		if err != nil {
-
 			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
 			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
 			http.Error(response, mensaje, http.StatusInternalServerError)
@@ -2967,4 +2969,201 @@ func options3(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Access-Control-Allow-Origin", "*")
 	response.Header().Set("Access-Control-Allow-Methods", "OPTIONS, GET")
 	return
+}
+
+//HandlerEnv para recuperar las variables de entorno
+func HandlerEnv(response http.ResponseWriter, request *http.Request) {
+	//Methodos permitidos GET-OPTIONS
+	switch request.Method {
+	//para recuperar las condiciones de entrada de la tabla planif
+	case "GET":
+		getEnv(response, request)
+	case "OPTIONS":
+		options3(response, request)
+	default:
+		jsonerror.UserMessage = fmt.Sprintf("Not implemented Method %s", request.Method)
+		//Montamos el json de error
+		JsResponser, err := json.Marshal(jsonerror)
+		//Controlar el error y grabar en log
+		if err != nil {
+			//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error  HandlerEnv id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		//Aunque saquemos mensaje de error, grabamos
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, jsonerror.UserMessage, nil)
+		//para que funcione correctamente el orden tiene que ser este. Grabar cabecera, escribir cabecera, escribir cuerpo(json)
+		//creamos cabecera de respuesta
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 405 al error
+		response.WriteHeader(http.StatusMethodNotAllowed)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+}
+
+//getEnv recupera las variables de entorno
+func getEnv(response http.ResponseWriter, request *http.Request) {
+	//Creamos la variable donde mapearemos los datos
+	var envjson structs.EnvJSON
+	//Recuperamos los datos
+	envjson.Dbhost, _ = os.LookupEnv("DB_HOST")
+	envjson.Dbuser, _ = os.LookupEnv("DB_USER")
+	envjson.Dbpassword, _ = os.LookupEnv("DB_PASSWORD")
+	envjson.Dbdatabase, _ = os.LookupEnv("DB_DATABASE")
+	envjson.Servport, _ = os.LookupEnv("SERV_PORT")
+	envjson.ServportSSL, _ = os.LookupEnv("SERV_PORT_SSL")
+	envjson.Sersafe, _ = os.LookupEnv("SERV_SAFE")
+	//Generamos el json
+	JsResponser, err := json.Marshal(envjson)
+	//controlamos el error de json
+	if err != nil {
+		iderror = online.GeneraIDError()
+		mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+		//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+		http.Error(response, mensaje, http.StatusInternalServerError)
+		descripcion := "Error en la generacion del json de error  getEnv id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+		//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+		response.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	//creamos cabecera de respuesta
+	response.Header().Set("Content-Type", "application/json")
+	//devolvemos la respuesta
+	response.Write(JsResponser)
+}
+
+//HandlerEnvRefresh para recuperar las variables de entorno
+func HandlerEnvRefresh(response http.ResponseWriter, request *http.Request) {
+	//Methodos permitidos GET-OPTIONS
+	switch request.Method {
+	//para recuperar las condiciones de entrada de la tabla planif
+	case "GET":
+		getEnvRefresh(response, request)
+	case "OPTIONS":
+		options3(response, request)
+	default:
+		jsonerror.UserMessage = fmt.Sprintf("Not implemented Method %s", request.Method)
+		//Montamos el json de error
+		JsResponser, err := json.Marshal(jsonerror)
+		//Controlar el error y grabar en log
+		if err != nil {
+			//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error  HandlerEnvRefresh id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		//Aunque saquemos mensaje de error, grabamos
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, jsonerror.UserMessage, nil)
+		//para que funcione correctamente el orden tiene que ser este. Grabar cabecera, escribir cabecera, escribir cuerpo(json)
+		//creamos cabecera de respuesta
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 405 al error
+		response.WriteHeader(http.StatusMethodNotAllowed)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+}
+
+//getEnvRefresh para actualizar la variable de entorno en tiempo de ejecucion
+func getEnvRefresh(response http.ResponseWriter, request *http.Request) {
+	//Limpiamos las variable de entorno
+	os.Clearenv()
+	//Volvemos a cargar las variables
+	environment.Loadenvironment(*structs.Entorno)
+	//Ejecutamos getEnv para que muestre el Json con la info de las variables de entorno
+	getEnv(response, request)
+}
+
+//HandlerTest para recuperar las variables de entorno
+func HandlerTest(response http.ResponseWriter, request *http.Request) {
+	//Methodos permitidos GET-OPTIONS
+	switch request.Method {
+	//para recuperar las condiciones de entrada de la tabla planif
+	case "GET":
+		getTest(response, request)
+	case "OPTIONS":
+		options3(response, request)
+	default:
+		jsonerror.UserMessage = fmt.Sprintf("Not implemented Method %s", request.Method)
+		//Montamos el json de error
+		JsResponser, err := json.Marshal(jsonerror)
+		//Controlar el error y grabar en log
+		if err != nil {
+			//ejecutamos la funcion para generar el ID de error para mostrar y grabar en el log y poder localizarlo más rápidamente
+			iderror = online.GeneraIDError()
+			mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+			//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+			http.Error(response, mensaje, http.StatusInternalServerError)
+			descripcion := "Error en la generacion del json de error  HandlerTest id: " + iderror
+			online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+			//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+			response.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		//Aunque saquemos mensaje de error, grabamos
+		online.EjecutaInfo(nombreservicio, *structs.Entorno, jsonerror.UserMessage, nil)
+		//para que funcione correctamente el orden tiene que ser este. Grabar cabecera, escribir cabecera, escribir cuerpo(json)
+		//creamos cabecera de respuesta
+		response.Header().Set("Content-Type", "application/json")
+		//movemos 405 al error
+		response.WriteHeader(http.StatusMethodNotAllowed)
+		//grabamos el json de error
+		response.Write(JsResponser)
+		return
+	}
+}
+
+func getTest(response http.ResponseWriter, request *http.Request) {
+	var result *sql.Rows
+	var err error
+	//Creamos variable
+	var testJSON structs.TestJSON
+	testJSON.Status = "OK"
+	//realizamos un select a alguna tabla para comprobar si tenemos conexión con db2
+	sql := "SELECT * FROM calendarios"
+	result, err = db2.EjecutaQuery(sql)
+	//defer result.Close()
+	//defer result.Close()
+	if err != nil {
+		testJSON.ConexDb2 = "KO"
+
+	} else {
+		testJSON.ConexDb2 = "OK"
+		defer result.Close()
+	}
+	//Generamos el json
+	JsResponser, err := json.Marshal(testJSON)
+	//controlamos el error de json
+	if err != nil {
+		iderror = online.GeneraIDError()
+		mensaje := fmt.Sprintf("Fatal Mistake id: %s", iderror)
+		//Mostramos error por pantalla para que puedan localizar y tambien lo guardamos en el log
+		http.Error(response, mensaje, http.StatusInternalServerError)
+		descripcion := "Error en la generacion del json de error  getTest id: " + iderror
+		online.EjecutaError(nombreservicio, *structs.Entorno, descripcion, err)
+		//movemos 500 al error y no grabamos ni tipo ni json, ya que esto se guardara en log
+		response.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	//creamos cabecera de respuesta
+	response.Header().Set("Content-Type", "application/json")
+	//devolvemos la respuesta
+	response.Write(JsResponser)
 }
