@@ -3022,6 +3022,8 @@ func getEnv(response http.ResponseWriter, request *http.Request) {
 	envjson.Servport, _ = os.LookupEnv("SERV_PORT")
 	envjson.ServportSSL, _ = os.LookupEnv("SERV_PORT_SSL")
 	envjson.Sersafe, _ = os.LookupEnv("SERV_SAFE")
+	envjson.PathCert, _ = os.LookupEnv("PATH_CERT")
+	envjson.PathKey, _ = os.LookupEnv("PATH_KEY")
 	//Generamos el json
 	JsResponser, err := json.Marshal(envjson)
 	//controlamos el error de json
