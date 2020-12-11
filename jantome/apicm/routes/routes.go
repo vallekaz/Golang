@@ -32,4 +32,11 @@ func Routes() {
 	http.HandleFunc("/cm/v1/planificacion/condicionout/", actions.HandlerPlanifCondicionout)
 	//Endpoint para recuperar el log de la ejecucion tiene / ya que ira el nombre
 	http.HandleFunc("/cm/v1/ejecuciones/logs/", actions.HandlerLog)
+	//Endpoint para recuperar las variables de entorno
+	http.HandleFunc("/cm/v1/server/env", actions.HandlerEnv)
+	//Endpoint para actualizar en tiempo de ejecucion las variables de entorno
+	http.HandleFunc("/cm/v1/server/env/refresh", actions.HandlerEnvRefresh)
+	//Endpoint para comprobar si esta activo el servidor de CM y si tiene conexión con la BBDD
+	http.HandleFunc("/cm/v1/server/test", actions.HandlerTest)
+
 }
