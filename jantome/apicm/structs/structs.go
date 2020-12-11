@@ -141,6 +141,8 @@ type EnvJSON struct {
 	Servport    string `json:"servport"`
 	ServportSSL string `json:"servportssl"`
 	Sersafe     string `json:"sersafe"`
+	PathCert    string `json:"pathCert"`
+	PathKey     string `json:"pathKey"`
 }
 
 //TestJSON struc con el contenido y la info para el test del servidor
