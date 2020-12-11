@@ -35,6 +35,8 @@ func main() {
 	port, _ := os.LookupEnv("SERV_PORT")
 	portSSL, _ := os.LookupEnv("SERV_PORT_SSL")
 	serSafe, _ := os.LookupEnv("SERV_SAFE")
+	certpem, _ := os.LookupEnv("PATH_CERT")
+	keypem, _ := os.LookupEnv("PATH_KEY")
 	switch serSafe {
 	//servidor seguro
 	case "S":
@@ -43,7 +45,7 @@ func main() {
 		//grabamos en el log el arranque del servidor
 		online.Start(nameserver, *structs.Entorno, portSSL, "Secure Server")
 		//Arrancamos con seguridad SSL
-		err := http.ListenAndServeTLS(portSSL, "cert.pem", "key.pem", nil)
+		err := http.ListenAndServeTLS(portSSL, certpem, keypem, nil)
 		//controlamos el error de listener
 		if err != nil {
 			log.Fatal(err)
@@ -70,7 +72,7 @@ func main() {
 			online.Start(nameserver, *structs.Entorno, portSSL, "Secure Server")
 
 			//Arrancamos con seguridad SSL
-			err := http.ListenAndServeTLS(portSSL, "cert.pem", "key.pem", nil)
+			err := http.ListenAndServeTLS(portSSL, certpem, keypem, nil)
 			//Arracamos sin serguridad SSL
 			if err != nil {
 				log.Fatal(err)
