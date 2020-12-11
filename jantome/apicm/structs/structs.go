@@ -131,3 +131,20 @@ type Postcondicionout struct {
 	Condicionout string `json:"condicionout"`
 	Useralt      string `json:"useralt"`
 }
+
+//EnvJSON struct con el contenido de las variables de sistema
+type EnvJSON struct {
+	Dbhost      string `json:"dbhost"`
+	Dbuser      string `json:"dbuser"`
+	Dbpassword  string `json:"dbpassword"`
+	Dbdatabase  string `json:"dbdatabase"`
+	Servport    string `json:"servport"`
+	ServportSSL string `json:"servportssl"`
+	Sersafe     string `json:"sersafe"`
+}
+
+//TestJSON struc con el contenido y la info para el test del servidor
+type TestJSON struct {
+	Status   string `json:"status"`
+	ConexDb2 string `json:"conexdb2"`
+}
